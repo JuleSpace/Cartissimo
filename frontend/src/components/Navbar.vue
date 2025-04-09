@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar">
     <div class="navbar-brand">
-      <img src="http://localhost:3000/logo.png" alt="Logo Cartissimo" class="logo">
+      <img src="http://192.168.1.137:3000/public/images/logo.png" alt="Logo Cartissimo" class="logo">
       <h1>Cartissimo</h1>
     </div>
     <div class="navbar-menu">

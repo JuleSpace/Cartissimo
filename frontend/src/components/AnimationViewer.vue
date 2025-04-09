@@ -121,19 +121,14 @@ export default {
         console.log('Pas de chemin de son disponible');
         return null;
       }
-      const fullPath = `http://localhost:3000${soundPath}`;
+      const fullPath = `http://192.168.1.137:3000${soundPath}`;
       console.log('Chemin du son final:', fullPath);
       return fullPath;
     });
 
     const getImagePath = (path) => {
-      if (!path) {
-        console.log('Pas de chemin d\'image disponible');
-        return '';
-      }
-      const fullPath = `http://localhost:3000${path}`;
-      console.log('Chemin de l\'image:', fullPath);
-      return fullPath;
+      if (!path) return '';
+      return `http://192.168.1.137:3000${path}`;
     };
 
     const fetchAnimations = async () => {
@@ -142,7 +137,7 @@ export default {
         console.log('Token:', localStorage.getItem('token'));
         console.log('Theme ID:', route.params.themeId);
         
-        const response = await axios.get(`http://localhost:3000/api/themes/${route.params.themeId}/animations`, {
+        const response = await axios.get(`http://192.168.1.137:3000/api/themes/${route.params.themeId}/animations`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }

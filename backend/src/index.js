@@ -17,7 +17,19 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:8080', 'http://192.168.1.137:8080'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
+// Ajout d'un middleware pour logger les requêtes
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -29,7 +41,19 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/payments', paymentRoutes);
 
 // Servir les fichiers statiques
-app.use(express.static(path.join(__dirname, '../public')));
+app.use('/public', express.static(path.join(__dirname, '../public')));
+app.use('/animations', express.static(path.join(__dirname, '../public/animations')));
+app.use('/sounds', express.static(path.join(__dirname, '../public/sounds')));
+app.use('/images', express.static(path.join(__dirname, '../public/images')));
+
+// Servir le frontend en production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+  
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
+  });
+}
 
 // Synchronisation de la base de données
 sequelize.sync()
@@ -41,6 +65,12 @@ sequelize.sync()
   });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const HOST = process.env.HOST || '0.0.0.0';
+const IP = process.env.IP || 'localhost';
+
+app.listen(PORT, HOST, () => {
   console.log(`Serveur démarré sur le port ${PORT}`);
+  console.log(`Accessible sur http://localhost:${PORT}`);
+  console.log(`Et sur http://${IP}:${PORT}`);
+  console.log('Le serveur écoute sur toutes les interfaces réseau');
 }); 
