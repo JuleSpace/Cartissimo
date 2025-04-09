@@ -1,0 +1,76 @@
+-- Création de la base de données
+CREATE DATABASE IF NOT EXISTS cartissimo;
+USE cartissimo;
+
+-- Table des utilisateurs
+CREATE TABLE IF NOT EXISTS Users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'user') NOT NULL DEFAULT 'user',
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Table des patients
+CREATE TABLE IF NOT EXISTS Patients (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    firstName VARCHAR(255) NOT NULL,
+    lastName VARCHAR(255) NOT NULL,
+    birthDate DATE NOT NULL,
+    parentEmail VARCHAR(255) NOT NULL,
+    subscriptionStatus ENUM('active', 'inactive', 'expired') NOT NULL DEFAULT 'inactive',
+    subscriptionEndDate DATE,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Table des thèmes
+CREATE TABLE IF NOT EXISTS Themes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Table des animations
+CREATE TABLE IF NOT EXISTS Animations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    themeId INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    animatedGifPath VARCHAR(255) NOT NULL,
+    soundPath VARCHAR(255) NOT NULL,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (themeId) REFERENCES Themes(id) ON DELETE CASCADE
+);
+
+-- Table des sessions
+CREATE TABLE IF NOT EXISTS Sessions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    patientId INT NOT NULL,
+    themeId INT NOT NULL,
+    startTime DATETIME NOT NULL,
+    endTime DATETIME,
+    status ENUM('in_progress', 'completed', 'cancelled') NOT NULL DEFAULT 'in_progress',
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (patientId) REFERENCES Patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (themeId) REFERENCES Themes(id) ON DELETE CASCADE
+);
+
+-- Table des interactions
+CREATE TABLE IF NOT EXISTS Interactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sessionId INT NOT NULL,
+    animationId INT NOT NULL,
+    interactionTime DATETIME NOT NULL,
+    reactionType ENUM('positive', 'negative', 'neutral') NOT NULL,
+    notes TEXT,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (sessionId) REFERENCES Sessions(id) ON DELETE CASCADE,
+    FOREIGN KEY (animationId) REFERENCES Animations(id) ON DELETE CASCADE
+); 
