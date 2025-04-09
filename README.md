@@ -34,7 +34,8 @@ npm install
 
 3. **Configurer la base de données** :
 - Démarrer XAMPP (MySQL)
-- Importer le script de base de données
+- Créer une bdd nommée Cartissimo
+- La base devrait se remplir au lancement du backend via le batch.
 
 4. **Démarrer l'application** :
 ```bash
@@ -54,10 +55,9 @@ L'application utilise PM2 pour le déploiement en production. Le script `start-c
 - Le frontend sur le port 8080
 - Les variables d'environnement nécessaires
 
-## Contribution
-
-1. Fork le projet
-2. Créer une branche (`git checkout -b feature/AmazingFeature`)
-3. Commit les changements (`git commit -m 'Add some AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une Pull Request 
+## Importation des Données
+```bash
+# Backend
+cd backend
+node src/database/seed.js
+```
