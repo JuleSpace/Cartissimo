@@ -33,11 +33,26 @@ npm install
 ```
 
 3. **Configurer la base de données** :
-- Démarrer XAMPP (MySQL)
+- Démarrer XAMPP ou équivalent (MySQL)
 - Créer une bdd nommée Cartissimo
 - La base devrait se remplir au lancement du backend via le batch.
 
-4. **Démarrer l'application** :
+4. **Préparer le backend** :
+```bash
+# Backend
+cd backend
+npm run prod
+```
+-Une fois terminé et le serveur lancé effectuer un Ctrl + C pour fermer le serveur.
+
+## Importation des Données
+```bash
+# Backend
+cd backend
+node src/database/seed.js
+```
+
+5. **Démarrer l'application** :
 ```bash
 # Utiliser le script batch
 start-cartissimo.bat
@@ -54,10 +69,3 @@ L'application utilise PM2 pour le déploiement en production. Le script `start-c
 - Le backend sur le port 3000
 - Le frontend sur le port 8080
 - Les variables d'environnement nécessaires
-
-## Importation des Données
-```bash
-# Backend
-cd backend
-node src/database/seed.js
-```
