@@ -2,8 +2,7 @@ import { createStore } from 'vuex';
 import axios from 'axios';
 import auth from './modules/auth';
 import theme from './modules/theme';
-
-const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:3000/api';
+import { API_URL } from '@/config';
 
 export default createStore({
   state: {

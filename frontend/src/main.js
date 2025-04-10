@@ -4,9 +4,10 @@ import router from './router'
 import store from './store'
 import axios from 'axios'
 import './assets/styles/global.css'
+import { API_URL } from '@/config'
 
 // Configuration globale d'axios
-axios.defaults.baseURL = 'http://localhost:3000/api'
+axios.defaults.baseURL = API_URL
 axios.defaults.headers.common['Content-Type'] = 'application/json'
 
 // Récupérer le token du localStorage s'il existe

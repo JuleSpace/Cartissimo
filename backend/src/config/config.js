@@ -5,7 +5,7 @@ module.exports = {
       port: 3306,
       username: 'root',
       password: '',
-      database: 'animations_db'
+      database: 'cartissimo'
     },
     server: {
       port: 3000,

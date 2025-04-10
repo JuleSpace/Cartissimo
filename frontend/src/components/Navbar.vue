@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar">
     <div class="navbar-brand">
-      <img src="http://192.168.1.137:3000/public/images/logo.png" alt="Logo Cartissimo" class="logo">
+      <img :src="logoUrl" alt="Logo Cartissimo" class="logo">
       <h1>Cartissimo</h1>
     </div>
     <div class="navbar-menu">
@@ -17,6 +17,7 @@
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { computed } from 'vue';
+import { SERVER_BASE_URL } from '@/config';
 
 export default {
   name: 'Navbar',
@@ -25,6 +26,7 @@ export default {
     const router = useRouter();
 
     const isAuthenticated = computed(() => store.getters['auth/isAuthenticated']);
+    const logoUrl = computed(() => `${SERVER_BASE_URL}/public/images/logo.png`);
 
     const logout = async () => {
       await store.dispatch('auth/logout');
@@ -33,7 +35,8 @@ export default {
 
     return {
       isAuthenticated,
-      logout
+      logout,
+      logoUrl
     };
   }
 };

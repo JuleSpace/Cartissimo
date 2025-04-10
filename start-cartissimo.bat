@@ -14,22 +14,40 @@ echo IP configurée: %IP%
 echo Démarrage du backend...
 cd backend
 if not exist ecosystem.config.js (
-    echo ERREUR: ecosystem.config.js non trouvé dans %CD%
+    echo ERREUR: ecosystem.config.js non trouvé dans backend
     pause
     exit /b 1
 )
-set IP=%IP%
+REM Passer l'IP au backend via les variables d'environnement de PM2
+REM Note: La méthode exacte dépend de comment ecosystem.config.js lit l'IP
+REM Si ecosystem.config.js lit process.env.IP, PM2 devrait l'hériter du set global.
 start /B pm2 start ecosystem.config.js
 echo Backend démarré
 
-echo Démarrage du frontend...
+echo Préparation et démarrage du frontend...
 cd ../frontend
-if not exist ecosystem.config.js (
-    echo ERREUR: ecosystem.config.js non trouvé dans %CD%
+
+REM Étape 1: Définir la variable d'environnement pour le build
+echo Définition de VUE_APP_IP=%IP% pour le build frontend...
+set VUE_APP_IP=%IP%
+
+REM Étape 2: Construire le frontend avec la bonne IP
+echo Construction du frontend (npm run build)...
+call npm run build
+if %errorlevel% neq 0 (
+    echo ERREUR: Le build du frontend a échoué.
     pause
     exit /b 1
 )
-set VUE_APP_IP=%IP%
+echo Build du frontend terminé.
+
+REM Étape 3: Démarrer le serveur frontend avec PM2 (qui servira le dossier 'dist' nouvellement construit)
+if not exist ecosystem.config.js (
+    echo ERREUR: ecosystem.config.js non trouvé dans frontend
+    pause
+    exit /b 1
+)
+echo Démarrage du serveur frontend via PM2...
 start /B pm2 start ecosystem.config.js
 echo Frontend démarré
 

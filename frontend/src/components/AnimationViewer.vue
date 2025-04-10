@@ -73,6 +73,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
+import { SERVER_BASE_URL, API_URL } from '@/config';
 
 export default {
   name: 'AnimationViewer',
@@ -121,14 +122,14 @@ export default {
         console.log('Pas de chemin de son disponible');
         return null;
       }
-      const fullPath = `http://192.168.1.137:3000${soundPath}`;
+      const fullPath = `${SERVER_BASE_URL}${soundPath}`;
       console.log('Chemin du son final:', fullPath);
       return fullPath;
     });
 
     const getImagePath = (path) => {
       if (!path) return '';
-      return `http://192.168.1.137:3000${path}`;
+      return `${SERVER_BASE_URL}${path}`;
     };
 
     const fetchAnimations = async () => {
@@ -137,7 +138,7 @@ export default {
         console.log('Token:', localStorage.getItem('token'));
         console.log('Theme ID:', route.params.themeId);
         
-        const response = await axios.get(`http://192.168.1.137:3000/api/themes/${route.params.themeId}/animations`, {
+        const response = await axios.get(`${API_URL}/themes/${route.params.themeId}/animations`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }

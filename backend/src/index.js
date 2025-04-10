@@ -14,11 +14,19 @@ const paymentRoutes = require('./routes/payment');
 // Chargement des variables d'environnement
 dotenv.config();
 
+const IP = process.env.IP || 'localhost';
+const frontendOrigin = `http://${IP}:8080`;
+
 const app = express();
 
 // Middleware
+const allowedOrigins = [
+  'http://localhost:8080',
+  frontendOrigin
+];
+
 app.use(cors({
-  origin: ['http://localhost:8080', 'http://192.168.1.137:8080'],
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -66,7 +74,6 @@ sequelize.sync()
 
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
-const IP = process.env.IP || 'localhost';
 
 app.listen(PORT, HOST, () => {
   console.log(`Serveur démarré sur le port ${PORT}`);
