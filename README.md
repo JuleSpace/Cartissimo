@@ -69,3 +69,17 @@ L'application utilise PM2 pour le déploiement en production. Le script `start-c
 - Le backend sur le port 3000
 - Le frontend sur le port 8080
 - Les variables d'environnement nécessaires
+
+## Comptes
+
+Administrateur :
+Email : admin@cartissimo.com
+Mot de passe : Admin123!
+
+Thérapeute :
+Email : therapeute@cartissimo.com
+Mot de passe : Therapeute123!
+
+Parent :
+Email : parent@cartissimo.com
+Mot de passe : Parent123!
