@@ -59,7 +59,7 @@ npm install pm2 -g
 6. **Démarrer l'application** :
 ```bash
 # Utiliser le script batch
-start-cartissimo.bat
+./start-cartissimo.bat
 ```
 
 ## Développement
