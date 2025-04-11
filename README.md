@@ -17,7 +17,7 @@ Application d'aide aux enfants malentendants avec animations et sons.
 
 1. **Cloner le dépôt** :
 ```bash
-git clone [[URL_DU_REPO]](https://github.com/JuleSpace/Cartissimo.git)
+git clone https://github.com/JuleSpace/Cartissimo.git
 cd cartissimo
 ```
 
