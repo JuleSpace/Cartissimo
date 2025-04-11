@@ -106,40 +106,29 @@ const themeController = {
           });
         } else {
           console.log('Récupération des thèmes pour parent');
-          // Récupérer tous les patients du parent
-          const patients = await Patient.findAll({
-            where: { userId: user.id }
+          // Récupérer les thèmes associés au parent via user_themes
+          const userThemes = await UserTheme.findAll({
+            where: { userId: user.id },
+            include: [{
+              model: Theme,
+              as: 'theme',
+              include: [
+                {
+                  model: User,
+                  as: 'creator',
+                  attributes: ['id', 'firstName', 'lastName', 'email']
+                },
+                {
+                  model: Animation,
+                  as: 'animations',
+                  attributes: ['id', 'name', 'description', 'animatedGifPath', 'realGifPath', 'soundPath', 'duration', 'width', 'height', 'status']
+                }
+              ]
+            }]
           });
 
-          // Récupérer les thèmes associés à ces patients via une requête SQL
-          const patientThemes = await db.sequelize.query(
-            'SELECT DISTINCT t.* FROM themes t ' +
-            'JOIN patient_themes pt ON t.id = pt.theme_id ' +
-            'WHERE pt.patient_id IN (?)',
-            {
-              replacements: [patients.map(p => p.id)],
-              type: db.sequelize.QueryTypes.SELECT
-            }
-          );
-
-          // Récupérer les détails complets des thèmes
-          themes = await Theme.findAll({
-            where: {
-              id: patientThemes.map(pt => pt.id)
-            },
-            include: [
-              {
-                model: User,
-                as: 'creator',
-                attributes: ['id', 'firstName', 'lastName', 'email']
-              },
-              {
-                model: Animation,
-                as: 'animations',
-                attributes: ['id', 'name', 'description', 'animatedGifPath', 'realGifPath', 'soundPath', 'duration', 'width', 'height', 'status']
-              }
-            ]
-          });
+          // Extraire les thèmes de la relation
+          themes = userThemes.map(ut => ut.theme);
         }
       } catch (dbError) {
         console.error('Erreur lors de la requête à la base de données:', dbError);
@@ -222,21 +211,16 @@ const themeController = {
         return res.json(theme);
       }
 
-      // Pour les parents, vérifier si un de leurs enfants a accès au thème
+      // Pour les parents, vérifier s'ils ont accès au thème via user_themes
       if (req.user.role === 'parent') {
-        const patients = await Patient.findAll({
-          where: { userId: req.user.id }
+        const hasAccess = await UserTheme.findOne({
+          where: {
+            userId: req.user.id,
+            themeId: theme.id
+          }
         });
 
-        const hasAccess = await db.sequelize.query(
-          'SELECT * FROM patient_themes WHERE theme_id = ? AND patient_id IN (?)',
-          {
-            replacements: [theme.id, patients.map(p => p.id)],
-            type: db.sequelize.QueryTypes.SELECT
-          }
-        );
-
-        if (hasAccess && hasAccess.length > 0) {
+        if (hasAccess) {
           return res.json(theme);
         }
       }

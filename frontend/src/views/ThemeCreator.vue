@@ -164,9 +164,15 @@ export default {
 
 <style scoped>
 .theme-creator {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+  padding: 0.5rem;
+  max-width: 1200px;
+  margin: 120px auto 0;
+}
+
+@media (min-width: 768px) {
+  .theme-creator {
+    margin: 100px auto 0;
+  }
 }
 
 .header {

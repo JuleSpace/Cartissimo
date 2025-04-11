@@ -155,23 +155,23 @@ export default {
 
 <style scoped>
 .theme-access-manager {
-  padding: 2rem;
+  padding: 0.5rem;
+  max-width: 1200px;
+  margin: 70px auto 0;
 }
 
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 0 0.5rem;
 }
 
-.btn-back {
-  padding: 0.5rem 1rem;
-  background-color: #4B95DE;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.header h1 {
+  font-size: 1.25rem;
+  margin: 0;
+  line-height: 1.3;
 }
 
 .admin-sections {
@@ -182,101 +182,169 @@ export default {
 
 .admin-section {
   background: white;
-  border-radius: 8px;
-  padding: 1.5rem;
+  border-radius: 12px;
+  padding: 1rem 0.75rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-section h2 {
+  font-size: 1.1rem;
+  margin: 0 0 1rem 0;
+  padding: 0 0.5rem;
 }
 
 .patients-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1rem;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding: 0 0.25rem;
 }
 
 .patient-card {
   background: #f8f9fa;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  padding: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .patient-info {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  text-align: center;
+  width: 100%;
 }
 
 .patient-avatar {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #e9ecef;
-  border-radius: 50%;
-  color: #4B95DE;
+  display: none;
+}
+
+.patient-details {
+  width: 100%;
+  text-align: center;
 }
 
 .patient-details h3 {
+  font-size: 0.95rem;
+  line-height: 1.2;
   margin: 0;
-  color: #2C3E50;
-  font-size: 1.1rem;
 }
 
 .patient-details p {
-  margin: 0.25rem 0 0 0;
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
   color: #666;
-  font-size: 0.9rem;
 }
 
 .access-status {
-  margin: 1rem 0;
+  margin: 0.5rem 0;
+  width: 100%;
 }
 
 .status-badge {
   display: inline-block;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-weight: 500;
-  font-size: 0.9rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  margin: 0.25rem 0;
 }
 
 .status-granted {
-  background-color: #4CAF50;
-  color: white;
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #2e7d32;
 }
 
 .status-denied {
-  background-color: #f44336;
-  color: white;
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #c62828;
 }
 
 .card-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
+  width: 100%;
+  margin-top: auto;
 }
 
 .action-button {
   width: 100%;
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid;
+  cursor: pointer;
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+.action-button.btn-approve {
+  color: #2e7d32;
+  border-color: #2e7d32;
+}
+
+.action-button.btn-approve:hover {
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+.action-button.btn-reject {
+  color: #c62828;
+  border-color: #c62828;
+}
+
+.action-button.btn-reject:hover {
+  background-color: rgba(244, 67, 54, 0.1);
+}
+
+@media (min-width: 768px) {
+  .theme-access-manager {
+    padding: 1rem;
+    margin: 40px auto 0;
+  }
+
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .admin-section {
+    padding: 1.5rem;
+  }
+
+  .patients-list {
+    padding: 0;
+    gap: 1rem;
+  }
+
+  .patient-card {
+    padding: 1rem;
+  }
+}
+
+.btn-back {
   padding: 0.5rem 1rem;
+  background-color: #4B95DE;
+  color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  width: 100%;
 }
 
-.btn-approve {
-  background-color: #4CAF50;
-  color: white;
-}
-
-.btn-reject {
-  background-color: #f44336;
-  color: white;
+@media (min-width: 768px) {
+  .btn-back {
+    width: auto;
+  }
 }
 
 .loading, .error, .empty-state {
