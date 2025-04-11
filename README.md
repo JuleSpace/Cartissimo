@@ -84,6 +84,14 @@ Thérapeute :
 Email : therapeute@cartissimo.com
 Mot de passe : Therapeute123!
 
+Thérapeute 2:
+Email : therapeute2@cartissimo.com
+Mot de passe : Therapeute123!
+
 Parent :
 Email : parent@cartissimo.com
+Mot de passe : Parent123!
+
+Parent 2:
+Email : parent2@cartissimo.com
 Mot de passe : Parent123!
