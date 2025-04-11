@@ -51,8 +51,12 @@ npm run prod
 cd backend
 node src/database/seed.js
 ```
+E. **Installer pm2** :
+cd ..
+npm install pm2 -g
 
-5. **Démarrer l'application** :
+
+6. **Démarrer l'application** :
 ```bash
 # Utiliser le script batch
 start-cartissimo.bat
