@@ -5,7 +5,7 @@ export default {
   namespaced: true,
   
   state: {
-    user: null,
+    user: JSON.parse(localStorage.getItem('user')) || null,
     token: localStorage.getItem('token') || null,
     loading: false,
     error: null
@@ -14,11 +14,12 @@ export default {
   mutations: {
     SET_USER(state, user) {
       state.user = user;
+      localStorage.setItem('user', JSON.stringify(user));
     },
     SET_TOKEN(state, token) {
       state.token = token;
+      localStorage.setItem('token', token);
       if (token) {
-        localStorage.setItem('token', token);
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       } else {
         localStorage.removeItem('token');
@@ -30,6 +31,12 @@ export default {
     },
     SET_ERROR(state, error) {
       state.error = error;
+    },
+    CLEAR_AUTH(state) {
+      state.token = null;
+      state.user = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
     }
   },
 
@@ -70,16 +77,8 @@ export default {
       }
     },
 
-    async logout({ commit }) {
-      try {
-        commit('SET_LOADING', true);
-        commit('SET_TOKEN', null);
-        commit('SET_USER', null);
-      } catch (error) {
-        console.error('Erreur lors de la déconnexion:', error);
-      } finally {
-        commit('SET_LOADING', false);
-      }
+    logout({ commit }) {
+      commit('CLEAR_AUTH');
     },
 
     async checkAuth({ commit, state }) {
@@ -104,6 +103,7 @@ export default {
     isAuthenticated: state => !!state.token,
     currentUser: state => state.user,
     isLoading: state => state.loading,
-    error: state => state.error
+    error: state => state.error,
+    userRole: state => state.user?.role || null
   }
 }; 

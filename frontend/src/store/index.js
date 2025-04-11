@@ -1,7 +1,9 @@
 import { createStore } from 'vuex';
 import axios from 'axios';
 import auth from './modules/auth';
-import theme from './modules/theme';
+import themes from './modules/themes';
+import animations from './modules/animations';
+import patients from './modules/patients';
 import { API_URL } from '@/config';
 
 export default createStore({
@@ -26,6 +28,8 @@ export default createStore({
   },
   modules: {
     auth,
-    theme
+    themes,
+    animations,
+    patients
   }
 }); 
