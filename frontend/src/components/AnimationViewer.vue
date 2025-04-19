@@ -441,9 +441,8 @@ h1 {
 }
 
 .animation-image {
-  width: 100%;
-  max-width: 300px;
-  height: auto;
+  width: 300px;
+  height: 300px;
   border-radius: var(--border-radius-md);
   box-shadow: var(--shadow-sm);
 }

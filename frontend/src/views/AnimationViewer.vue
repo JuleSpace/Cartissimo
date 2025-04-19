@@ -342,8 +342,8 @@ export default {
 }
 
 .animation-image {
-  width: 100%;
-  max-height: 500px;
+  width: 300px;
+  height: 300px;
   object-fit: contain;
   display: block;
 }
