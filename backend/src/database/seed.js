@@ -43,6 +43,24 @@ const seedDatabase = async () => {
         lastName: 'Martin',
         role: 'parent',
         subscriptionRequired: true
+      },
+      // Nouvel orthophoniste
+      {
+        email: 'therapeute2@cartissimo.com',
+        password: therapeutePassword,
+        firstName: 'Sophie',
+        lastName: 'Bernard',
+        role: 'orthophonist',
+        subscriptionRequired: true
+      },
+      // Nouveau parent
+      {
+        email: 'parent2@cartissimo.com',
+        password: parentPassword,
+        firstName: 'Pierre',
+        lastName: 'Dubois',
+        role: 'parent',
+        subscriptionRequired: true
       }
     ]);
 
@@ -56,6 +74,34 @@ const seedDatabase = async () => {
         userId: 3, // ID du parent
         subscriptionStatus: 'active',
         subscriptionEndDate: '2025-12-31'
+      },
+      // Nouveaux patients
+      {
+        firstName: 'Lucas',
+        lastName: 'Petit',
+        birthDate: '2015-01-15',
+        parentEmail: 'parent@cartissimo.com',
+        userId: 3, // ID du premier parent
+        subscriptionStatus: 'active',
+        subscriptionEndDate: '2025-12-31'
+      },
+      {
+        firstName: 'Emma',
+        lastName: 'Dubois',
+        birthDate: '2016-03-20',
+        parentEmail: 'parent2@cartissimo.com',
+        userId: 5, // ID du deuxième parent
+        subscriptionStatus: 'active',
+        subscriptionEndDate: '2025-12-31'
+      },
+      {
+        firstName: 'Thomas',
+        lastName: 'Dubois',
+        birthDate: '2017-05-10',
+        parentEmail: 'parent2@cartissimo.com',
+        userId: 5, // ID du deuxième parent
+        subscriptionStatus: 'active',
+        subscriptionEndDate: '2025-12-31'
       }
     ]);
 
@@ -64,13 +110,26 @@ const seedDatabase = async () => {
       {
         name: 'Animaux de la Ferme',
         description: 'Thème sur les animaux de la ferme',
-        createdBy: 1,
+        createdBy: 2,
         status: 'approved'
       },
       {
         name: 'Véhicules',
         description: 'Thème sur les véhicules',
-        createdBy: 1,
+        createdBy: 2,
+        status: 'approved'
+      },
+      // Nouveaux thèmes
+      {
+        name: 'Animaux domestiques',
+        description: 'Thème sur les animaux domestiques',
+        createdBy: 4,
+        status: 'approved'
+      },
+      {
+        name: 'Météo',
+        description: 'Thème sur la météo',
+        createdBy: 4,
         status: 'approved'
       }
     ]);
@@ -88,7 +147,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 1,
-        createdBy: 1
+        createdBy: 2
       },
       {
         name: 'Cochon',
@@ -101,7 +160,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 1,
-        createdBy: 1
+        createdBy: 2
       },
       {
         name: 'Poule',
@@ -114,7 +173,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 1,
-        createdBy: 1
+        createdBy: 2
       },
       {
         name: 'Mouton',
@@ -127,7 +186,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 1,
-        createdBy: 1
+        createdBy: 2
       },
       {
         name: 'Cheval',
@@ -140,7 +199,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 1,
-        createdBy: 1
+        createdBy: 2
       },
       {
         name: 'Canard',
@@ -153,7 +212,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 1,
-        createdBy: 1
+        createdBy: 2
       },
       {
         name: 'Chèvre',
@@ -166,7 +225,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 1,
-        createdBy: 1
+        createdBy: 2
       },
       {
         name: 'Âne',
@@ -179,7 +238,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 1,
-        createdBy: 1
+        createdBy: 2
       },
       {
         name: 'Oie',
@@ -192,7 +251,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 1,
-        createdBy: 1
+        createdBy: 2
       },
       {
         name: 'Lapin',
@@ -205,7 +264,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 1,
-        createdBy: 1
+        createdBy: 2
       }
     ];
 
@@ -222,7 +281,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 2,
-        createdBy: 1
+        createdBy: 2
       },
       {
         name: 'Camion',
@@ -235,7 +294,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 2,
-        createdBy: 1
+        createdBy: 2
       },
       {
         name: 'Bus',
@@ -248,7 +307,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 2,
-        createdBy: 1
+        createdBy: 2
       },
       {
         name: 'Moto',
@@ -261,7 +320,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 2,
-        createdBy: 1
+        createdBy: 2
       },
       {
         name: 'Vélo',
@@ -274,7 +333,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 2,
-        createdBy: 1
+        createdBy: 2
       },
       {
         name: 'Tram',
@@ -287,7 +346,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 2,
-        createdBy: 1
+        createdBy: 2
       },
       {
         name: 'Train',
@@ -300,7 +359,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 2,
-        createdBy: 1
+        createdBy: 2
       },
       {
         name: 'Avion',
@@ -313,7 +372,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 2,
-        createdBy: 1
+        createdBy: 2
       },
       {
         name: 'Bateau',
@@ -326,7 +385,7 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 2,
-        createdBy: 1
+        createdBy: 2
       },
       {
         name: 'Hélicoptère',
@@ -339,25 +398,305 @@ const seedDatabase = async () => {
         height: 300,
         status: 'approved',
         themeId: 2,
-        createdBy: 1
+        createdBy: 2
+      }
+    ];
+
+    // Créer les animations pour le thème "Animaux domestiques"
+    const animauxDomestiquesAnimations = [
+      {
+        name: 'Chat',
+        description: 'Animation d\'un chat',
+        animatedGifPath: '/animations/animaux_dom/chat_anime.gif',
+        realGifPath: '/animations/animaux_dom/chat_reel.gif',
+        soundPath: '/sounds/animaux_dom/chat.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 3,
+        createdBy: 4
+      },
+      {
+        name: 'Chien',
+        description: 'Animation d\'un chien',
+        animatedGifPath: '/animations/animaux_dom/chien_anime.gif',
+        realGifPath: '/animations/animaux_dom/chien_reel.gif',
+        soundPath: '/sounds/animaux_dom/chien.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 3,
+        createdBy: 4
+      },
+      {
+        name: 'Oiseau',
+        description: 'Animation d\'un oiseau',
+        animatedGifPath: '/animations/animaux_dom/oiseau_anime.gif',
+        realGifPath: '/animations/animaux_dom/oiseau_reel.gif',
+        soundPath: '/sounds/animaux_dom/oiseau.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 3,
+        createdBy: 4
+      },
+      {
+        name: 'Poisson',
+        description: 'Animation d\'un poisson',
+        animatedGifPath: '/animations/animaux_dom/poisson_anime.gif',
+        realGifPath: '/animations/animaux_dom/poisson_reel.gif',
+        soundPath: '/sounds/animaux_dom/poisson.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 3,
+        createdBy: 4
+      },
+      {
+        name: 'Hamster',
+        description: 'Animation d\'un hamster',
+        animatedGifPath: '/animations/animaux_dom/hamster_anime.gif',
+        realGifPath: '/animations/animaux_dom/hamster_reel.gif',
+        soundPath: '/sounds/animaux_dom/hamster.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 3,
+        createdBy: 4
+      },
+      {
+        name: 'Lapin',
+        description: 'Animation d\'un lapin',
+        animatedGifPath: '/animations/animaux_dom/lapin_anime.gif',
+        realGifPath: '/animations/animaux_dom/lapin_reel.gif',
+        soundPath: '/sounds/animaux_dom/lapin.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 3,
+        createdBy: 4
+      },
+      {
+        name: 'Tortue',
+        description: 'Animation d\'une tortue',
+        animatedGifPath: '/animations/animaux_dom/tortue_anime.gif',
+        realGifPath: '/animations/animaux_dom/tortue_reel.gif',
+        soundPath: '/sounds/animaux_dom/tortue.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 3,
+        createdBy: 4
+      },
+      {
+        name: 'Cochon d\'Inde',
+        description: 'Animation d\'un cochon d\'Inde',
+        animatedGifPath: '/animations/animaux_dom/cochon_indien_anime.gif',
+        realGifPath: '/animations/animaux_dom/cochon_indien_reel.gif',
+        soundPath: '/sounds/animaux_dom/cochon_indien.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 3,
+        createdBy: 4
+      },
+      {
+        name: 'Perroquet',
+        description: 'Animation d\'un perroquet',
+        animatedGifPath: '/animations/animaux_dom/perroquet_anime.gif',
+        realGifPath: '/animations/animaux_dom/perroquet_reel.gif',
+        soundPath: '/sounds/animaux_dom/perroquet.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 3,
+        createdBy: 4
+      },
+      {
+        name: 'Souris',
+        description: 'Animation d\'une souris',
+        animatedGifPath: '/animations/animaux_dom/souris_anime.gif',
+        realGifPath: '/animations/animaux_dom/souris_reel.gif',
+        soundPath: '/sounds/animaux_dom/souris.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 3,
+        createdBy: 4
+      }
+    ];
+
+    // Créer les animations pour le thème "Météo"
+    const meteoAnimations = [
+      {
+        name: 'Soleil',
+        description: 'Animation du soleil',
+        animatedGifPath: '/animations/meteo/soleil_anime.gif',
+        realGifPath: '/animations/meteo/soleil_reel.gif',
+        soundPath: '/sounds/meteo/soleil.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 4,
+        createdBy: 4
+      },
+      {
+        name: 'Pluie',
+        description: 'Animation de la pluie',
+        animatedGifPath: '/animations/meteo/pluie_anime.gif',
+        realGifPath: '/animations/meteo/pluie_reel.gif',
+        soundPath: '/sounds/meteo/pluie.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 4,
+        createdBy: 4
+      },
+      {
+        name: 'Nuage',
+        description: 'Animation d\'un nuage',
+        animatedGifPath: '/animations/meteo/nuage_anime.gif',
+        realGifPath: '/animations/meteo/nuage_reel.gif',
+        soundPath: '/sounds/meteo/nuage.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 4,
+        createdBy: 4
+      },
+      {
+        name: 'Vent',
+        description: 'Animation du vent',
+        animatedGifPath: '/animations/meteo/vent_anime.gif',
+        realGifPath: '/animations/meteo/vent_reel.gif',
+        soundPath: '/sounds/meteo/vent.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 4,
+        createdBy: 4
+      },
+      {
+        name: 'Neige',
+        description: 'Animation de la neige',
+        animatedGifPath: '/animations/meteo/neige_anime.gif',
+        realGifPath: '/animations/meteo/neige_reel.gif',
+        soundPath: '/sounds/meteo/neige.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 4,
+        createdBy: 4
+      },
+      {
+        name: 'Orage',
+        description: 'Animation d\'un orage',
+        animatedGifPath: '/animations/meteo/orage_anime.gif',
+        realGifPath: '/animations/meteo/orage_reel.gif',
+        soundPath: '/sounds/meteo/orage.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 4,
+        createdBy: 4
+      },
+      {
+        name: 'Arc-en-ciel',
+        description: 'Animation d\'un arc-en-ciel',
+        animatedGifPath: '/animations/meteo/arc_en_ciel_anime.gif',
+        realGifPath: '/animations/meteo/arc_en_ciel_reel.gif',
+        soundPath: '/sounds/meteo/arc_en_ciel.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 4,
+        createdBy: 4
+      },
+      {
+        name: 'Brouillard',
+        description: 'Animation du brouillard',
+        animatedGifPath: '/animations/meteo/brouillard_anime.gif',
+        realGifPath: '/animations/meteo/brouillard_reel.gif',
+        soundPath: '/sounds/meteo/brouillard.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 4,
+        createdBy: 4
+      },
+      {
+        name: 'Éclair',
+        description: 'Animation d\'un éclair',
+        animatedGifPath: '/animations/meteo/eclair_anime.gif',
+        realGifPath: '/animations/meteo/eclair_reel.gif',
+        soundPath: '/sounds/meteo/eclair.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 4,
+        createdBy: 4
+      },
+      {
+        name: 'Grêle',
+        description: 'Animation de la grêle',
+        animatedGifPath: '/animations/meteo/grele_anime.gif',
+        realGifPath: '/animations/meteo/grele_reel.gif',
+        soundPath: '/sounds/meteo/grele.mp3',
+        duration: 2000,
+        width: 300,
+        height: 300,
+        status: 'approved',
+        themeId: 4,
+        createdBy: 4
       }
     ];
 
     // Créer toutes les animations
-    await Animation.bulkCreate([...animauxAnimations, ...vehiculesAnimations]);
+    await Animation.bulkCreate([...animauxAnimations, ...vehiculesAnimations, ...animauxDomestiquesAnimations, ...meteoAnimations]);
 
     // Associer les utilisateurs aux thèmes
     await UserTheme.bulkCreate([
       { userId: 1, themeId: 1 }, // Admin a accès aux animaux
       { userId: 1, themeId: 2 }, // Admin a accès aux véhicules
+      { userId: 1, themeId: 3 }, // Admin a accès aux animaux domestiques
+      { userId: 1, themeId: 4 }, // Admin a accès à la météo
       { userId: 2, themeId: 1 }, // Thérapeute a accès aux animaux
       { userId: 2, themeId: 2 }, // Thérapeute a accès aux véhicules
-      { userId: 3, themeId: 1 }  // Parent a accès aux animaux
+      { userId: 2, themeId: 3 }, // Thérapeute a accès aux animaux domestiques
+      { userId: 2, themeId: 4 }, // Thérapeute a accès à la météo
+      { userId: 3, themeId: 1 }, // Parent a accès aux animaux
+      { userId: 3, themeId: 2 }, // Parent a accès aux véhicules
+      { userId: 4, themeId: 3 }, // Nouveau thérapeute a accès aux animaux domestiques
+      { userId: 4, themeId: 4 }, // Nouveau thérapeute a accès à la météo
+      { userId: 5, themeId: 3 }, // Nouveau parent a accès aux animaux domestiques
+      { userId: 5, themeId: 4 }  // Nouveau parent a accès à la météo
     ]);
 
     // Associer les thérapeutes aux patients
     await patient_therapists.bulkCreate([
-      { patientId: 1, therapistId: 2 }
+      { patientId: 1, therapistId: 2 },
+      { patientId: 2, therapistId: 2 },
+      { patientId: 3, therapistId: 4 },
+      { patientId: 4, therapistId: 4 }
     ]);
 
     console.log('Base de données initialisée avec succès !');
@@ -372,9 +711,17 @@ const seedDatabase = async () => {
     console.log('\nParent :');
     console.log('Email: parent@cartissimo.com');
     console.log('Mot de passe: Parent123!');
-    console.log('\nPatient associé :');
-    console.log('Nom: Jean Dupont');
-    console.log('Email du parent: parent@cartissimo.com');
+    console.log('\nNouveau Thérapeute :');
+    console.log('Email: therapeute2@cartissimo.com');
+    console.log('Mot de passe: Therapeute123!');
+    console.log('\nNouveau Parent :');
+    console.log('Email: parent2@cartissimo.com');
+    console.log('Mot de passe: Parent123!');
+    console.log('\nPatients associés :');
+    console.log('Jean Dupont (parent@cartissimo.com)');
+    console.log('Lucas Petit (parent@cartissimo.com)');
+    console.log('Emma Dubois (parent2@cartissimo.com)');
+    console.log('Thomas Dubois (parent2@cartissimo.com)');
 
     process.exit(0);
   } catch (error) {

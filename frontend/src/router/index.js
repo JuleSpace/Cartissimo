@@ -1,37 +1,72 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { useStore } from 'vuex';
+import store from '../store';
+import Login from '../views/Login.vue';
+import ThemeList from '../views/ThemeList.vue';
+import AnimationViewer from '../views/AnimationViewer.vue';
+import ThemeCreator from '../views/ThemeCreator.vue';
+import AdminPanel from '../views/AdminPanel.vue';
+import ThemeAccessManager from '../views/ThemeAccessManager.vue';
 
 const routes = [
   {
     path: '/',
     name: 'Login',
-    component: () => import('../views/Login.vue')
+    component: Login
   },
   {
     path: '/themes',
     name: 'Themes',
-    component: () => import('../components/ThemeList.vue'),
+    component: ThemeList,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/themes/create',
+    name: 'ThemeCreator',
+    component: ThemeCreator,
+    meta: { 
+      requiresAuth: true,
+      requiresRole: 'orthophonist'
+    }
+  },
+  {
+    path: '/admin',
+    name: 'AdminPanel',
+    component: AdminPanel,
+    meta: { 
+      requiresAuth: true,
+      requiresRole: 'admin'
+    }
   },
   {
     path: '/themes/:themeId/animations',
     name: 'Animations',
-    component: () => import('../components/AnimationViewer.vue'),
+    component: AnimationViewer,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/themes/:themeId/access',
+    name: 'ThemeAccess',
+    component: ThemeAccessManager,
+    meta: { 
+      requiresAuth: true,
+      requiresRole: 'orthophonist'
+    }
   }
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(process.env.BASE_URL),
   routes
 });
 
 router.beforeEach((to, from, next) => {
-  const store = useStore();
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const isAuthenticated = store.getters['auth/isAuthenticated'];
+  const userRole = store.getters['auth/userRole'];
 
-  if (requiresAuth && !store.getters['auth/isAuthenticated']) {
+  if (to.meta.requiresAuth && !isAuthenticated) {
     next('/');
+  } else if (to.meta.requiresRole && to.meta.requiresRole !== userRole) {
+    next('/themes');
   } else {
     next();
   }

@@ -51,13 +51,11 @@ npm run prod
 cd backend
 node src/database/seed.js
 ```
-E. **Installer pm2** :
-cd ..
-npm install pm2 -g
-
 
 6. **Démarrer l'application** :
 ```bash
+# Retourner dans le dossier racine et installer pm2
+npm install pm2 -g
 # Utiliser le script batch
 ./start-cartissimo.bat
 ```
@@ -84,6 +82,14 @@ Thérapeute :
 Email : therapeute@cartissimo.com
 Mot de passe : Therapeute123!
 
+Thérapeute 2:
+Email : therapeute2@cartissimo.com
+Mot de passe : Therapeute123!
+
 Parent :
 Email : parent@cartissimo.com
+Mot de passe : Parent123!
+
+Parent 2:
+Email : parent2@cartissimo.com
 Mot de passe : Parent123!

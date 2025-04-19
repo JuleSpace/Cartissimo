@@ -3,16 +3,14 @@ import { API_URL } from '@/config';
 
 export default {
   namespaced: true,
-
   state: {
-    themes: [],
+    patients: [],
     loading: false,
     error: null
   },
-
   mutations: {
-    SET_THEMES(state, themes) {
-      state.themes = themes;
+    SET_PATIENTS(state, patients) {
+      state.patients = patients;
     },
     SET_LOADING(state, loading) {
       state.loading = loading;
@@ -21,40 +19,35 @@ export default {
       state.error = error;
     }
   },
-
   actions: {
-    async fetchThemes({ commit, rootState }) {
-      console.log('Début de fetchThemes');
-      console.log('Token disponible:', !!rootState.auth.token);
-      
-      commit('SET_LOADING', true);
-      commit('SET_ERROR', null);
-
+    async fetchPatients({ commit, rootState }) {
       try {
-        console.log('Envoi de la requête à:', `${API_URL}/themes`);
-        const response = await axios.get(`${API_URL}/themes`, {
+        commit('SET_LOADING', true);
+        commit('SET_ERROR', null);
+        
+        const response = await axios.get(`${API_URL}/patients`, {
           headers: {
             Authorization: `Bearer ${rootState.auth.token}`
           }
         });
-        console.log('Réponse reçue:', response.data);
-        commit('SET_THEMES', response.data);
+        
+        commit('SET_PATIENTS', response.data);
+        return response.data;
       } catch (error) {
         console.error('Erreur détaillée:', {
           message: error.message,
           response: error.response?.data,
           status: error.response?.status
         });
-        commit('SET_ERROR', error.response?.data?.message || 'Erreur lors de la récupération des thèmes');
+        commit('SET_ERROR', error.response?.data?.message || 'Erreur lors de la récupération des patients');
         throw error;
       } finally {
         commit('SET_LOADING', false);
       }
     }
   },
-
   getters: {
-    allThemes: state => state.themes,
+    allPatients: state => state.patients,
     isLoading: state => state.loading,
     error: state => state.error
   }

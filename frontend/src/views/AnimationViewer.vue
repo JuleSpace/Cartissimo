@@ -1,12 +1,10 @@
 <template>
   <div class="animation-container">
     <div class="animation-header">
-      <h1 class="animation-title">{{ currentTheme?.name }}</h1>
-      <p class="animation-description">{{ currentTheme?.description }}</p>
-      <button @click="goBack" class="back-button">
-        <span class="icon">←</span>
-        Retour aux thèmes
-      </button>
+      <div class="header-content">
+        <h1 class="animation-title">{{ currentTheme?.name }}</h1>
+        <p class="animation-description">{{ currentTheme?.description }}</p>
+      </div>
     </div>
 
     <div v-if="loading" class="loading-state">
@@ -20,9 +18,20 @@
     <div v-else class="animation-content">
       <div class="main-animation">
         <div class="animation-display">
-          <img :src="currentAnimation?.imagePath" 
-               :alt="currentAnimation?.name" 
-               class="animation-image" />
+          <div class="animation-images-container">
+            <div class="animation-image-wrapper">
+              <h3 class="image-title">Version animée</h3>
+              <img :src="getImagePath(currentAnimation?.animatedGifPath)" 
+                   :alt="currentAnimation?.name + ' (animé)'" 
+                   class="animation-image" />
+            </div>
+            <div class="animation-image-wrapper">
+              <h3 class="image-title">Version réelle</h3>
+              <img :src="getImagePath(currentAnimation?.realGifPath)" 
+                   :alt="currentAnimation?.name + ' (réel)'" 
+                   class="animation-image" />
+            </div>
+          </div>
         </div>
         <div class="controls">
           <button @click="playSound" class="control-button play-sound-button">
@@ -42,6 +51,12 @@
             Suivant
           </button>
         </div>
+        <div class="back-control">
+          <button @click="goBack" class="back-button">
+            <span class="icon">←</span>
+            Retour aux thèmes
+          </button>
+        </div>
       </div>
 
       <div class="animation-list">
@@ -51,14 +66,21 @@
                :key="animation.id"
                @click="selectAnimation(animation)"
                :class="['animation-item', { active: animation.id === currentAnimation?.id }]">
-            <img :src="animation.imagePath" 
-                 :alt="animation.name" 
-                 class="animation-item-image" />
+            <div class="animation-item-images">
+              <img :src="getImagePath(animation.animatedGifPath)" 
+                   :alt="animation.name + ' (animé)'" 
+                   class="animation-item-image" />
+              <img :src="getImagePath(animation.realGifPath)" 
+                   :alt="animation.name + ' (réel)'" 
+                   class="animation-item-image" />
+            </div>
             <span class="animation-item-name">{{ animation.name }}</span>
           </div>
         </div>
       </div>
     </div>
+    
+    <audio ref="audioPlayer" :src="currentSound" preload="auto"></audio>
   </div>
 </template>
 
@@ -66,6 +88,7 @@
 import { ref, computed } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter, useRoute } from 'vue-router';
+import { SERVER_BASE_URL } from '@/config';
 
 export default {
   name: 'AnimationViewer',
@@ -84,16 +107,23 @@ export default {
     const error = computed(() => store.state.animations.error);
     
     const hasPrevious = computed(() => {
-      if (!currentAnimation.value || !animations.value) return false;
+      if (!currentAnimation.value || !animations.value || !Array.isArray(animations.value)) return false;
       const currentIndex = animations.value.findIndex(a => a.id === currentAnimation.value.id);
       return currentIndex > 0;
     });
     
     const hasNext = computed(() => {
-      if (!currentAnimation.value || !animations.value) return false;
+      if (!currentAnimation.value || !animations.value || !Array.isArray(animations.value)) return false;
       const currentIndex = animations.value.findIndex(a => a.id === currentAnimation.value.id);
       return currentIndex < animations.value.length - 1;
     });
+
+    const getImagePath = (path) => {
+      if (!path) return '';
+      const fullPath = `${SERVER_BASE_URL}${path}`;
+      console.log('Chemin complet:', fullPath);
+      return fullPath;
+    };
 
     const fetchData = async () => {
       const themeId = route.params.themeId;
@@ -101,8 +131,20 @@ export default {
         await store.dispatch('themes/fetchTheme', themeId);
         await store.dispatch('animations/fetchAnimations', themeId);
         currentTheme.value = store.state.themes.currentTheme;
-        if (animations.value.length > 0) {
+        
+        console.log('Animations reçues:', animations.value);
+        
+        if (animations.value && Array.isArray(animations.value) && animations.value.length > 0) {
           currentAnimation.value = animations.value[0];
+          console.log('Animation courante:', currentAnimation.value);
+          
+          // Préparer le chemin du son
+          if (currentAnimation.value.soundPath) {
+            currentSound.value = getImagePath(currentAnimation.value.soundPath);
+            console.log('Chemin du son:', currentSound.value);
+          }
+        } else {
+          console.warn('Aucune animation disponible ou format invalide:', animations.value);
         }
       } catch (err) {
         console.error('Erreur lors du chargement:', err);
@@ -111,7 +153,7 @@ export default {
 
     const playSound = () => {
       if (currentAnimation.value?.soundPath) {
-        currentSound.value = currentAnimation.value.soundPath;
+        currentSound.value = getImagePath(currentAnimation.value.soundPath);
         if (audioPlayer.value) {
           audioPlayer.value.play();
         }
@@ -120,18 +162,32 @@ export default {
 
     const previousAnimation = () => {
       if (!hasPrevious.value) return;
+      if (!animations.value || !Array.isArray(animations.value)) return;
       const currentIndex = animations.value.findIndex(a => a.id === currentAnimation.value.id);
       currentAnimation.value = animations.value[currentIndex - 1];
+      // Mettre à jour le chemin du son
+      if (currentAnimation.value.soundPath) {
+        currentSound.value = getImagePath(currentAnimation.value.soundPath);
+      }
     };
 
     const nextAnimation = () => {
       if (!hasNext.value) return;
+      if (!animations.value || !Array.isArray(animations.value)) return;
       const currentIndex = animations.value.findIndex(a => a.id === currentAnimation.value.id);
       currentAnimation.value = animations.value[currentIndex + 1];
+      // Mettre à jour le chemin du son
+      if (currentAnimation.value.soundPath) {
+        currentSound.value = getImagePath(currentAnimation.value.soundPath);
+      }
     };
 
     const selectAnimation = (animation) => {
       currentAnimation.value = animation;
+      // Mettre à jour le chemin du son
+      if (animation.soundPath) {
+        currentSound.value = getImagePath(animation.soundPath);
+      }
     };
 
     const goBack = () => {
@@ -155,7 +211,8 @@ export default {
       previousAnimation,
       nextAnimation,
       selectAnimation,
-      goBack
+      goBack,
+      getImagePath
     };
   }
 };
@@ -164,6 +221,7 @@ export default {
 <style scoped>
 .animation-container {
   padding: 20px;
+  padding-top: 80px;
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -175,6 +233,10 @@ export default {
   margin-bottom: 30px;
   box-shadow: var(--shadow-sm);
   position: relative;
+}
+
+.header-content {
+  width: 100%;
 }
 
 .animation-title {
@@ -189,10 +251,13 @@ export default {
   line-height: 1.6;
 }
 
+.back-control {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
 .back-button {
-  position: absolute;
-  top: 20px;
-  right: 20px;
   padding: 10px 20px;
   background: linear-gradient(135deg, var(--blue-light) 0%, var(--blue) 100%);
   color: var(--text-light);
@@ -217,6 +282,12 @@ export default {
   gap: 30px;
 }
 
+@media (max-width: 992px) {
+  .animation-content {
+    grid-template-columns: 1fr;
+  }
+}
+
 .main-animation {
   background: var(--bg-secondary);
   border-radius: 8px;
@@ -229,11 +300,50 @@ export default {
   border-radius: 8px;
   overflow: hidden;
   border: 3px solid var(--mint);
+  padding: 15px;
+}
+
+.animation-images-container {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .animation-images-container {
+    flex-direction: column;
+  }
+  
+  .animation-image {
+    max-height: 300px;
+  }
+  
+  .controls {
+    flex-direction: column;
+  }
+  
+  .control-button {
+    width: 100%;
+  }
+}
+
+.animation-image-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.image-title {
+  margin-bottom: 10px;
+  color: var(--blue);
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 .animation-image {
-  width: 100%;
-  max-height: 500px;
+  width: 300px;
+  height: 300px;
   object-fit: contain;
   display: block;
 }
@@ -337,9 +447,14 @@ export default {
   color: var(--text-light);
 }
 
+.animation-item-images {
+  display: flex;
+  gap: 5px;
+}
+
 .animation-item-image {
-  width: 60px;
-  height: 60px;
+  width: 40px;
+  height: 40px;
   object-fit: cover;
   border-radius: 4px;
 }

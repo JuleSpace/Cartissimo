@@ -1,62 +1,41 @@
-const Patient = require('../models/Patient');
+const { Patient, User, patient_therapists } = require('../models');
+const { Op, Sequelize } = require('sequelize');
+const sequelize = require('sequelize');
 
-exports.create = async (req, res) => {
-  try {
-    const patient = await Patient.create(req.body);
-    res.status(201).json(patient);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+const patientController = {
+  getPatients: async (req, res) => {
+    try {
+      const therapistId = req.user.id;
 
-exports.getAll = async (req, res) => {
-  try {
-    const patients = await Patient.findAll();
-    res.json(patients);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+      // Récupérer tous les patients liés à l'orthophoniste
+      const patients = await Patient.findAll({
+        include: [{
+          model: User,
+          as: 'parent',
+          attributes: ['id', 'firstName', 'lastName', 'email']
+        }],
+        where: {
+          '$parent.id$': {
+            [Op.in]: sequelize.literal(`(
+              SELECT DISTINCT p.user_id 
+              FROM patients p 
+              INNER JOIN patient_therapists pt ON p.id = pt.patient_id 
+              WHERE pt.therapist_id = ${therapistId}
+            )`)
+          }
+        }
+      });
 
-exports.getOne = async (req, res) => {
-  try {
-    const patient = await Patient.findByPk(req.params.id);
-    if (!patient) {
-      return res.status(404).json({ message: 'Patient non trouvé' });
+      res.json(patients);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des patients:', error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur lors de la récupération des patients",
+        error: error.message
+      });
     }
-    res.json(patient);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
   }
 };
 
-exports.update = async (req, res) => {
-  try {
-    const [updated] = await Patient.update(req.body, {
-      where: { id: req.params.id }
-    });
-    if (updated) {
-      const updatedPatient = await Patient.findByPk(req.params.id);
-      res.json(updatedPatient);
-    } else {
-      res.status(404).json({ message: 'Patient non trouvé' });
-    }
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-exports.delete = async (req, res) => {
-  try {
-    const deleted = await Patient.destroy({
-      where: { id: req.params.id }
-    });
-    if (deleted) {
-      res.json({ message: 'Patient supprimé avec succès' });
-    } else {
-      res.status(404).json({ message: 'Patient non trouvé' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-}; 
+module.exports = patientController; 
