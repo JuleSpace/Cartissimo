@@ -22,7 +22,7 @@
 
     <div v-else class="themes-grid">
       <div v-for="theme in filteredThemes" :key="theme.id" class="theme-card">
-        <img v-if="theme.image" :src="`/images/themes/${theme.image}`" :alt="theme.name" class="theme-image"/>
+        <img v-if="theme.image" :src="`http://192.168.1.32:3000${theme.image}`" :alt="theme.name" class="theme-image"/>
         <h2>{{ theme.name }}</h2>
         <p>{{ theme.description }}</p>
         <div class="theme-footer">
@@ -214,6 +214,14 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-top: 1rem;
+}
+.theme-image {
+  width: 150px;
+  height: 150px;
+}
+.theme-image:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
 }
 
 .category {

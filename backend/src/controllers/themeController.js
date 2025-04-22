@@ -15,6 +15,7 @@ const themeController = {
       const theme = await Theme.create({
         name,
         description,
+        image,
         status: 'pending',
         createdBy: req.user.id
       });
