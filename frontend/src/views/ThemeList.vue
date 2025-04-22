@@ -22,6 +22,7 @@
 
     <div v-else class="themes-grid">
       <div v-for="theme in filteredThemes" :key="theme.id" class="theme-card">
+        <img v-if="theme.image" :src="`/images/themes/${theme.image}`" :alt="theme.name" class="theme-image"/>
         <h2>{{ theme.name }}</h2>
         <p>{{ theme.description }}</p>
         <div class="theme-footer">
