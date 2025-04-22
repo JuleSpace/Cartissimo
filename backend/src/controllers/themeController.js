@@ -206,6 +206,11 @@ const themeController = {
         return res.status(404).json({ error: 'Thème non trouvé' });
       }
 
+      // Les administrateurs ont accès à tous les thèmes
+      if (req.user.role === 'admin') {
+        return res.json(theme);
+      }
+
       // Vérifier si l'utilisateur est le créateur du thème
       if (theme.createdBy === req.user.id) {
         return res.json(theme);
