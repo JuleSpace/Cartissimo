@@ -10,6 +10,7 @@ const themeRoutes = require('./routes/theme');
 const animationRoutes = require('./routes/animation');
 const patientRoutes = require('./routes/patient');
 const paymentRoutes = require('./routes/payment');
+const orthoRoutes = require('./routes/ortho');
 
 // Chargement des variables d'environnement
 dotenv.config();
@@ -47,6 +48,7 @@ app.use('/api/themes', themeRoutes);
 app.use('/api/animations', animationRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/orthophonistes', orthoRoutes);
 
 // Servir les fichiers statiques
 app.use('/public', express.static(path.join(__dirname, '../public')));

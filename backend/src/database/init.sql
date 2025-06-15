@@ -21,8 +21,10 @@ CREATE TABLE IF NOT EXISTS Patients (
     parentEmail VARCHAR(255) NOT NULL,
     subscriptionStatus ENUM('active', 'inactive', 'expired') NOT NULL DEFAULT 'inactive',
     subscriptionEndDate DATE,
+    orthophonisteId INT NOT NULL,
     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (orthophonisteId) REFERENCES Orthophonistes(id) ON DELETE CASCADE
 );
 
 -- Table des thèmes
@@ -74,3 +76,19 @@ CREATE TABLE IF NOT EXISTS Interactions (
     FOREIGN KEY (sessionId) REFERENCES Sessions(id) ON DELETE CASCADE,
     FOREIGN KEY (animationId) REFERENCES Animations(id) ON DELETE CASCADE
 ); 
+
+-- Table des orthophonistes
+CREATE TABLE IF NOT EXISTS Orthophonistes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    firstName VARCHAR(255) NOT NULL,
+    lastName VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    phone VARCHAR(20),
+    address TEXT,
+    city VARCHAR(255),
+    postalCode VARCHAR(10),
+    profilePictureUrl VARCHAR(255),
+    doctolibUrl VARCHAR(255),
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

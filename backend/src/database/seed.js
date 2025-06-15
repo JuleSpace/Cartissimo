@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const { User, Patient, Theme, Animation, UserTheme, patient_therapists } = require('../models');
 const sequelize = require('../config/database');
+const { Orthophoniste } = require('../models');
 
 const seedDatabase = async () => {
   try {
@@ -63,8 +64,33 @@ const seedDatabase = async () => {
         subscriptionRequired: true
       }
     ]);
+    // - - - Créer les patients - - -
+    const orthophonistes = await Orthophoniste.bulkCreate([
+      {
+        firstName: 'Marie',
+        lastName: 'Dubois',
+        email: 'therapeute@cartissimo.com',
+        phone: '0601020304',
+        address: '3 Bd Michelet',
+        city: 'Marseille',
+        postalCode: '13008',
+        profilePictureUrl: 'https://example.com/photos/marie.jpg',
+        doctolibUrl: 'https://www.doctolib.fr/orthophoniste/marseille/marie-dubois'
+      },
+      {
+        firstName: 'Sophie',
+        lastName: 'Bernard',
+        email: 'therapeute2@cartissimo.com',
+        phone: '0605060708',
+        address: '456 avenue Victor Hugo',
+        city: 'Lyon',
+        postalCode: '69002',
+        profilePictureUrl: 'https://example.com/photos/sophie.jpg',
+        doctolibUrl: 'https://www.doctolib.fr/orthophoniste/lyon/sophie-bernard'
+      }
+    ]);
 
-    // Créer les patients
+    // - - - Créer les patients - - - 
     const patients = await Patient.bulkCreate([
       {
         firstName: 'Jean',
@@ -73,26 +99,28 @@ const seedDatabase = async () => {
         parentEmail: 'parent@cartissimo.com',
         userId: 3, // ID du parent
         subscriptionStatus: 'active',
-        subscriptionEndDate: '2025-12-31'
+        subscriptionEndDate: '2025-12-31',
+        orthophonisteId: orthophonistes[0].id // Marie Dubois
       },
-      // Nouveaux patients
       {
         firstName: 'Lucas',
         lastName: 'Petit',
         birthDate: '2015-01-15',
         parentEmail: 'parent@cartissimo.com',
-        userId: 3, // ID du premier parent
+        userId: 3, // ID du parent
         subscriptionStatus: 'active',
-        subscriptionEndDate: '2025-12-31'
+        subscriptionEndDate: '2025-12-31',
+        orthophonisteId: orthophonistes[0].id // Marie Dubois
       },
       {
         firstName: 'Emma',
         lastName: 'Dubois',
         birthDate: '2016-03-20',
         parentEmail: 'parent2@cartissimo.com',
-        userId: 5, // ID du deuxième parent
+        userId: 5, // ID du parent
         subscriptionStatus: 'active',
-        subscriptionEndDate: '2025-12-31'
+        subscriptionEndDate: '2025-12-31',
+        orthophonisteId: orthophonistes[1].id // Sophie Bernard
       },
       {
         firstName: 'Thomas',
@@ -101,7 +129,8 @@ const seedDatabase = async () => {
         parentEmail: 'parent2@cartissimo.com',
         userId: 5, // ID du deuxième parent
         subscriptionStatus: 'active',
-        subscriptionEndDate: '2025-12-31'
+        subscriptionEndDate: '2025-12-31',
+        orthophonisteId: orthophonistes[1].id // Sophie Bernard
       }
     ]);
 
