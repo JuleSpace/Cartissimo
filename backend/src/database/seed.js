@@ -140,13 +140,15 @@ const seedDatabase = async () => {
         name: 'Animaux de la Ferme',
         description: 'Thème sur les animaux de la ferme',
         createdBy: 2,
-        status: 'approved'
+        status: 'approved',
+        image: '/images/themes/ferme.jpg',
       },
       {
         name: 'Véhicules',
         description: 'Thème sur les véhicules',
         createdBy: 2,
-        status: 'approved'
+        status: 'approved',
+        image: '/images/themes/vehicules.jpg',
       },
       // Nouveaux thèmes
       {
