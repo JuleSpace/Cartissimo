@@ -5,10 +5,13 @@
       <h1>Cartissimo</h1>
     </div>
     <div class="navbar-menu">
-      <button v-if="isAuthenticated" @click="logout" class="btn btn-primary logout-button">
-        <span class="icon">&#x2716;</span>
-        Se déconnecter
-      </button>
+      <div v-if="isAuthenticated" class="user-info">
+        <span class="user-email">{{ currentUser?.email }}</span>
+        <button @click="logout" class="btn btn-primary logout-button">
+          <span class="icon">&#x2716;</span>
+          Se déconnecter
+        </button>
+      </div>
     </div>
   </nav>
 </template>
@@ -26,6 +29,7 @@ export default {
     const router = useRouter();
 
     const isAuthenticated = computed(() => store.getters['auth/isAuthenticated']);
+    const currentUser = computed(() => store.getters['auth/currentUser']);
     const logoUrl = computed(() => `${SERVER_BASE_URL}/public/images/logo.png`);
 
     const logout = async () => {
@@ -35,6 +39,7 @@ export default {
 
     return {
       isAuthenticated,
+      currentUser,
       logout,
       logoUrl
     };
@@ -87,6 +92,23 @@ export default {
   letter-spacing: 0.5px;
 }
 
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.user-email {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0.9;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
 .logout-button {
   display: flex;
   align-items: center;
@@ -134,6 +156,15 @@ export default {
   .icon {
     font-size: 1rem;
   }
+
+  .user-info {
+    gap: var(--spacing-sm);
+  }
+
+  .user-email {
+    font-size: 0.8rem;
+    padding: var(--spacing-xs);
+  }
 }
 
 @media (max-width: 480px) {
@@ -162,6 +193,19 @@ export default {
 
   .navbar + * {
     margin-top: 56px;
+  }
+
+  .user-info {
+    gap: var(--spacing-xs);
+  }
+
+  .user-email {
+    font-size: 0.75rem;
+    padding: var(--spacing-xs);
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 </style> 
