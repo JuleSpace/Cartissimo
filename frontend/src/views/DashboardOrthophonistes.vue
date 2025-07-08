@@ -31,13 +31,14 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import { API_URL } from '@/config'
 
 const orthophonisteId = 1 // Id à récupérer dynamiquement plus tard (auth)
 const patients = ref([])
 
 onMounted(async () => {
   try {
-    const response = await axios.get(`http://localhost:3000/api/orthophonistes/${orthophonisteId}/dashboard`)
+    const response = await axios.get(`${API_URL}/orthophonistes/${orthophonisteId}/dashboard`)
     console.log('patients :', patients)
     console.log('Données reçues :', response.data)
     patients.value = response.data.patients
