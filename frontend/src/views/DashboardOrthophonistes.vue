@@ -3,7 +3,18 @@
   <div class="p-6">
     <h2 class="text-2xl font-bold mb-4">Mes Patients</h2>
 
-    <div v-if="Array.isArray(patients) && patients.length" class="space-y-4">
+    <div v-if="loading" class="text-center py-8">
+      <p class="text-gray-600">Chargement des patients...</p>
+    </div>
+
+    <div v-else-if="error" class="text-center py-8">
+      <p class="text-red-600">{{ error }}</p>
+      <button @click="fetchPatients" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+        Réessayer
+      </button>
+    </div>
+
+    <div v-else-if="Array.isArray(patients) && patients.length" class="space-y-4">
       <div
         v-for="patient in patients"
         :key="patient.id"
@@ -24,27 +35,47 @@
       </div>
     </div>
 
-    <p v-else>Aucun patient trouvé.</p>
+    <div v-else class="text-center py-8">
+      <p class="text-gray-600">Aucun patient trouvé.</p>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
-import { API_URL } from '@/config'
+import { ref, onMounted, computed } from 'vue'
+import { useStore } from 'vuex'
 
-const orthophonisteId = 1 // Id à récupérer dynamiquement plus tard (auth)
+const store = useStore()
 const patients = ref([])
+const loading = ref(false)
+const error = ref(null)
 
-onMounted(async () => {
-  try {
-    const response = await axios.get(`${API_URL}/orthophonistes/${orthophonisteId}/dashboard`)
-    console.log('patients :', patients)
-    console.log('Données reçues :', response.data)
-    patients.value = response.data.patients
-  } catch (err) {
-    console.error('Erreur de chargement du dashboard orthophoniste :', err)
+const currentUser = computed(() => store.getters['auth/currentUser'])
+
+const fetchPatients = async () => {
+  if (!currentUser.value) {
+    console.error('Aucun utilisateur connecté')
+    return
   }
+
+  loading.value = true
+  error.value = null
+
+  try {
+    console.log('Récupération des patients pour l\'orthophoniste:', currentUser.value.email)
+    const response = await store.dispatch('patients/fetchPatients')
+    patients.value = response
+    console.log('Patients récupérés:', patients.value)
+  } catch (err) {
+    console.error('Erreur de chargement des patients:', err)
+    error.value = err.message || 'Erreur lors du chargement des patients'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchPatients()
 })
 
 function formatDate(dateStr) {
