@@ -7,6 +7,8 @@ import ThemeCreator from '../views/ThemeCreator.vue';
 import AdminPanel from '../views/AdminPanel.vue';
 import ThemeAccessManager from '../views/ThemeAccessManager.vue';
 import DashboardOrthophonistes from '@/views/DashboardOrthophonistes.vue';
+import PaymentSuccess from '../views/PaymentSuccess.vue';
+import PaymentCancel from '../views/PaymentCancel.vue';
 
 const routes = [
   {
@@ -57,6 +59,18 @@ const routes = [
   path: '/dashboard',
   name: 'DashboardOrthophonistes',
   component: DashboardOrthophonistes
+  },
+  {
+    path: '/payment/success',
+    name: 'PaymentSuccess',
+    component: PaymentSuccess,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/payment/cancel',
+    name: 'PaymentCancel',
+    component: PaymentCancel,
+    meta: { requiresAuth: true }
  }
 ];
 

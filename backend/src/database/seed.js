@@ -35,7 +35,7 @@ const seedDatabase = async () => {
         firstName: 'Marie',
         lastName: 'Dubois',
         role: 'orthophonist',
-        subscriptionRequired: true
+        subscriptionRequired: false
       },
       {
         email: 'parent@cartissimo.com',
@@ -52,7 +52,7 @@ const seedDatabase = async () => {
         firstName: 'Sophie',
         lastName: 'Bernard',
         role: 'orthophonist',
-        subscriptionRequired: true
+        subscriptionRequired: false
       },
       // Nouveau parent
       {

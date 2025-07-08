@@ -51,11 +51,15 @@ module.exports = (sequelize) => {
       }
     },
     subscriptionStatus: {
-      type: DataTypes.ENUM('active', 'inactive', 'expired'),
-      defaultValue: 'active'
+      type: DataTypes.ENUM('active', 'inactive', 'expired', 'payment_failed'),
+      defaultValue: 'inactive'
     },
     subscriptionEndDate: {
       type: DataTypes.DATEONLY
+    },
+    stripeSubscriptionId: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
   }, {
     sequelize,

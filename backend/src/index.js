@@ -36,8 +36,16 @@ app.use(cors({
 // Ajout d'un middleware pour logger les requêtes
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
+  if (req.url.includes('/api/payments')) {
+    console.log('=== Requête vers API payments ===');
+    console.log('Headers:', req.headers);
+    console.log('Body:', req.body);
+  }
   next();
 });
+
+// Middleware pour les webhooks Stripe (doit être avant express.json())
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

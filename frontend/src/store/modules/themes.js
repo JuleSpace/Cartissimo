@@ -49,7 +49,12 @@ export default {
           response: error.response?.data,
           status: error.response?.status
         });
-        commit('SET_ERROR', error.response?.data?.message || 'Erreur lors de la récupération des thèmes');
+        
+        // Si c'est une erreur 403, c'est probablement que l'abonnement est requis
+        // Ne pas traiter cela comme une erreur normale
+        if (error.response?.status !== 403) {
+          commit('SET_ERROR', error.response?.data?.message || 'Erreur lors de la récupération des thèmes');
+        }
         throw error;
       } finally {
         commit('SET_LOADING', false);

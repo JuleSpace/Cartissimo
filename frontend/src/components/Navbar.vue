@@ -8,9 +8,9 @@
       <div v-if="isAuthenticated" class="user-info">
         <span class="user-email">{{ currentUser?.email }}</span>
         <button @click="logout" class="btn btn-primary logout-button">
-          <span class="icon">&#x2716;</span>
-          Se déconnecter
-        </button>
+        <span class="icon">&#x2716;</span>
+        Se déconnecter
+      </button>
       </div>
     </div>
   </nav>

@@ -1,46 +1,48 @@
 <template>
   <div class="theme-list">
-    <div class="header">
-      <h1>Séries</h1>
-      <div class="actions">
-        <button v-if="userRole === 'orthophonist'" @click="createNewTheme" class="create-button">
-          Créer une nouvelle série
-        </button>
-        <button v-if="userRole === 'orthophonist'" @click="goToDashboard" class="access-button">
-          Accès au Dashboard
-        </button>
-        <button v-if="userRole === 'admin'" @click="goToAdmin" class="admin-button">
-          Panneau d'administration
-        </button>
-      </div>
-    </div>
-
-    <div v-if="loading" class="loading">
-      Chargement...
-    </div>
-
-    <div v-else-if="error" class="error">
-      {{ error }}
-    </div>
-
-    <div v-else class="themes-grid">
-      <div v-for="theme in filteredThemes" :key="theme.id" class="theme-card">
-        <img v-if="theme.image" :src="getImagePath(theme.image)" :alt="theme.name" class="theme-image"/>
-        <h2>{{ theme.name }}</h2>
-        <p>{{ theme.description }}</p>
-        <div class="theme-footer">
-          <span class="category">{{ theme.category }}</span>
-          <span v-if="theme.status === 'pending'" class="pending">En attente d'approbation</span>
-          <span v-if="theme.status === 'rejected'" class="rejected">Rejeté</span>
+    <SubscriptionManager>
+      <div class="header">
+        <h1>Séries</h1>
+        <div class="actions">
+          <button v-if="userRole === 'orthophonist'" @click="createNewTheme" class="create-button">
+            Créer une nouvelle série
+          </button>
+          <button v-if="userRole === 'orthophonist'" @click="goToDashboard" class="access-button">
+            Accès au Dashboard
+          </button>
+          <button v-if="userRole === 'admin'" @click="goToAdmin" class="admin-button">
+            Panneau d'administration
+          </button>
         </div>
-        <button @click="viewAnimations(theme.id)" class="view-button">
-          Voir les animations
-        </button>
-        <button v-if="userRole === 'orthophonist'" @click="manageAccess(theme.id)" class="access-button">
-          Gérer les accès
-        </button>
       </div>
-    </div>
+
+      <div v-if="loading" class="loading">
+        Chargement...
+      </div>
+
+      <div v-else-if="error" class="error">
+        {{ error }}
+      </div>
+
+      <div v-else class="themes-grid">
+        <div v-for="theme in filteredThemes" :key="theme.id" class="theme-card">
+          <img v-if="theme.image" :src="getImagePath(theme.image)" :alt="theme.name" class="theme-image"/>
+          <h2>{{ theme.name }}</h2>
+          <p>{{ theme.description }}</p>
+          <div class="theme-footer">
+            <span class="category">{{ theme.category }}</span>
+            <span v-if="theme.status === 'pending'" class="pending">En attente d'approbation</span>
+            <span v-if="theme.status === 'rejected'" class="rejected">Rejeté</span>
+          </div>
+          <button @click="viewAnimations(theme.id)" class="view-button">
+            Voir les animations
+          </button>
+          <button v-if="userRole === 'orthophonist'" @click="manageAccess(theme.id)" class="access-button">
+            Gérer les accès
+          </button>
+        </div>
+      </div>
+    </SubscriptionManager>
   </div>
 </template>
 
@@ -49,9 +51,13 @@ import { computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { SERVER_BASE_URL } from '@/config';
+import SubscriptionManager from '@/components/SubscriptionManager.vue';
 
 export default {
   name: 'ThemeList',
+  components: {
+    SubscriptionManager
+  },
   setup() {
     const store = useStore();
     const router = useRouter();
@@ -102,7 +108,11 @@ export default {
       try {
         await store.dispatch('themes/fetchThemes');
       } catch (err) {
-        console.error('Erreur lors du chargement des thèmes:', err);
+        // Si c'est une erreur 403, c'est que l'abonnement est requis
+        // Le SubscriptionManager va gérer cela
+        if (err.response?.status !== 403) {
+          console.error('Erreur lors du chargement des thèmes:', err);
+        }
       }
     });
 
