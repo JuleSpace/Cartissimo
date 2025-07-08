@@ -25,7 +25,7 @@
 
     <div v-else class="themes-grid">
       <div v-for="theme in filteredThemes" :key="theme.id" class="theme-card">
-        <img v-if="theme.image" :src="`http://192.168.1.32:3000${theme.image}`" :alt="theme.name" class="theme-image"/>
+        <img v-if="theme.image" :src="getImagePath(theme.image)" :alt="theme.name" class="theme-image"/>
         <h2>{{ theme.name }}</h2>
         <p>{{ theme.description }}</p>
         <div class="theme-footer">
@@ -48,6 +48,7 @@
 import { computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { SERVER_BASE_URL } from '@/config';
 
 export default {
   name: 'ThemeList',
@@ -92,6 +93,11 @@ export default {
       router.push(`/themes/${themeId}/access`);
     };
 
+    const getImagePath = (path) => {
+      if (!path) return '';
+      return `${SERVER_BASE_URL}${path}`;
+    };
+    
     onMounted(async () => {
       try {
         await store.dispatch('themes/fetchThemes');
@@ -108,8 +114,9 @@ export default {
       createNewTheme,
       goToAdmin,
       viewAnimations,
-      manageAccess,
-      goToDashboard
+      goToDashboard,
+      getImagePath,
+      manageAccess
     };
   }
 };
