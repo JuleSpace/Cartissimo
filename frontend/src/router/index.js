@@ -6,6 +6,7 @@ import AnimationViewer from '../views/AnimationViewer.vue';
 import ThemeCreator from '../views/ThemeCreator.vue';
 import AdminPanel from '../views/AdminPanel.vue';
 import ThemeAccessManager from '../views/ThemeAccessManager.vue';
+import DashboardOrthophonistes from '@/views/DashboardOrthophonistes.vue';
 
 const routes = [
   {
@@ -51,7 +52,12 @@ const routes = [
       requiresAuth: true,
       requiresRole: 'orthophonist'
     }
-  }
+  },
+  {
+  path: '/dashboard',
+  name: 'DashboardOrthophonistes',
+  component: DashboardOrthophonistes
+ }
 ];
 
 const router = createRouter({

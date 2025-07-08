@@ -6,6 +6,9 @@
         <button v-if="userRole === 'orthophonist'" @click="createNewTheme" class="create-button">
           Créer une nouvelle série
         </button>
+        <button v-if="userRole === 'orthophonist'" @click="goToDashboard" class="access-button">
+          Accès au Dashboard
+        </button>
         <button v-if="userRole === 'admin'" @click="goToAdmin" class="admin-button">
           Panneau d'administration
         </button>
@@ -77,6 +80,10 @@ export default {
       router.push('/admin');
     };
 
+    const goToDashboard = () => {
+      router.push({ name: 'DashboardOrthophonistes' });
+    };
+
     const viewAnimations = (themeId) => {
       router.push(`/themes/${themeId}/animations`);
     };
@@ -101,7 +108,8 @@ export default {
       createNewTheme,
       goToAdmin,
       viewAnimations,
-      manageAccess
+      manageAccess,
+      goToDashboard
     };
   }
 };

@@ -7,6 +7,11 @@ module.exports = (sequelize) => {
         foreignKey: 'userId',
         as: 'parent'
       });
+      Patient.belongsTo(models.Orthophoniste, {
+        foreignKey: 'orthophonisteId',
+        as: 'orthophoniste'
+      });
+      
       Patient.belongsToMany(models.User, {
         through: 'PatientTherapists',
         foreignKey: 'patientId',
