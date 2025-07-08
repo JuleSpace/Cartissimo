@@ -67,7 +67,7 @@ export default {
         return themes.value;
       }
       if (userRole.value === 'orthophonist') {
-        return themes.value.filter(theme => theme.status !== 'rejected');
+        return themes.value;
       }
       // Pour les parents, ne montrer que les thèmes approuvés
       return themes.value.filter(theme => theme.status === 'approved');

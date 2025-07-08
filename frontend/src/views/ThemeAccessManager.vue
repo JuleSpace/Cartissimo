@@ -101,6 +101,8 @@ export default {
           patientId
         });
         themeAccess.value.add(patientId);
+        // Rafraîchir les données après l'action
+        await fetchData();
       } catch (err) {
         error.value = err.message;
       }
@@ -113,6 +115,8 @@ export default {
           patientId
         });
         themeAccess.value.delete(patientId);
+        // Rafraîchir les données après l'action
+        await fetchData();
       } catch (err) {
         error.value = err.message;
       }

@@ -1,30 +1,48 @@
-const { Patient, User, patient_therapists } = require('../models');
+const { Patient, User, Orthophoniste, patient_therapists } = require('../models');
 const { Op, Sequelize } = require('sequelize');
 const sequelize = require('sequelize');
 
 const patientController = {
   getPatients: async (req, res) => {
     try {
-      const therapistId = req.user.id;
+      const userEmail = req.user.email;
+      console.log('=== DEBUG getPatients ===');
+      console.log('User connecté:', req.user);
+      console.log('Email utilisateur:', userEmail);
 
-      // Récupérer tous les patients liés à l'orthophoniste
+      // Récupérer l'orthophoniste correspondant à cet email
+      const orthophoniste = await Orthophoniste.findOne({
+        where: { email: userEmail }
+      });
+
+      if (!orthophoniste) {
+        console.log('Aucun orthophoniste trouvé pour cet email');
+        return res.json([]);
+      }
+
+      console.log('Orthophoniste trouvé:', { id: orthophoniste.id, firstName: orthophoniste.firstName, lastName: orthophoniste.lastName });
+
+      // Debug: voir tous les patients en base
+      const allPatients = await Patient.findAll({
+        attributes: ['id', 'firstName', 'lastName', 'orthophonisteId']
+      });
+      console.log('Tous les patients en base:', allPatients.map(p => ({ id: p.id, name: p.firstName + ' ' + p.lastName, orthophonisteId: p.orthophonisteId })));
+
+      // Récupérer tous les patients liés à cet orthophoniste
       const patients = await Patient.findAll({
+        where: {
+          orthophonisteId: orthophoniste.id
+        },
         include: [{
           model: User,
           as: 'parent',
           attributes: ['id', 'firstName', 'lastName', 'email']
-        }],
-        where: {
-          '$parent.id$': {
-            [Op.in]: sequelize.literal(`(
-              SELECT DISTINCT p.user_id 
-              FROM patients p 
-              INNER JOIN patient_therapists pt ON p.id = pt.patient_id 
-              WHERE pt.therapist_id = ${therapistId}
-            )`)
-          }
-        }
+        }]
       });
+
+      console.log('Nombre de patients trouvés:', patients.length);
+      console.log('Patients:', patients.map(p => ({ id: p.id, name: p.firstName + ' ' + p.lastName, orthophonisteId: p.orthophonisteId })));
+      console.log('=== FIN DEBUG ===');
 
       res.json(patients);
     } catch (error) {

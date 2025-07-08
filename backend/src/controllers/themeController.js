@@ -1,4 +1,4 @@
-const { Theme, Animation, User, UserTheme, Patient, PatientTherapist } = require('../models');
+const { Theme, Animation, User, UserTheme, Patient, PatientTherapist, Orthophoniste } = require('../models');
 const { Op } = require('sequelize');
 const path = require('path');
 const db = require('../models');
@@ -88,10 +88,8 @@ const themeController = {
           });
         } else if (user.role === 'orthophonist') {
           console.log('Récupération des thèmes pour orthophoniste');
+          // Les orthophonistes ont accès à tous les thèmes pour gérer l'accès de leurs patients
           themes = await Theme.findAll({
-            where: {
-              createdBy: user.id
-            },
             include: [
               {
                 model: User,
@@ -209,6 +207,11 @@ const themeController = {
 
       // Les administrateurs ont accès à tous les thèmes
       if (req.user.role === 'admin') {
+        return res.json(theme);
+      }
+
+      // Les orthophonistes ont accès à tous les thèmes pour gérer l'accès de leurs patients
+      if (req.user.role === 'orthophonist') {
         return res.json(theme);
       }
 
@@ -371,47 +374,57 @@ const themeController = {
   grantAccess: async (req, res) => {
     try {
       const { themeId, patientId } = req.body;
-      const therapistId = req.user.id;
+      const userEmail = req.user.email;
+
+      console.log('=== DEBUG grantAccess ===');
+      console.log('themeId:', themeId);
+      console.log('patientId:', patientId);
+      console.log('userEmail:', userEmail);
+
+      // Récupérer l'orthophoniste correspondant à cet email
+      const orthophoniste = await Orthophoniste.findOne({
+        where: { email: userEmail }
+      });
+
+      console.log('Orthophoniste trouvé:', orthophoniste ? { id: orthophoniste.id, email: orthophoniste.email } : null);
+
+      if (!orthophoniste) {
+        return res.status(403).json({
+          success: false,
+          message: "Orthophoniste non trouvé"
+        });
+      }
 
       // Vérifier que l'orthophoniste a accès au patient
-      const hasAccess = await db.sequelize.query(
-        'SELECT * FROM patient_therapists WHERE patient_id = ? AND therapist_id = ?',
-        {
-          replacements: [patientId, therapistId],
-          type: db.sequelize.QueryTypes.SELECT
+      const patient = await Patient.findOne({
+        where: {
+          id: patientId,
+          orthophonisteId: orthophoniste.id
         }
-      );
+      });
 
-      if (!hasAccess || hasAccess.length === 0) {
+      console.log('Patient trouvé:', patient ? { id: patient.id, firstName: patient.firstName, userId: patient.userId } : null);
+
+      if (!patient) {
         return res.status(403).json({
           success: false,
           message: "Vous n'avez pas accès à ce patient"
         });
       }
 
-      // Vérifier que le thème appartient à l'orthophoniste
-      const theme = await Theme.findOne({
-        where: {
-          id: themeId,
-          createdBy: therapistId
-        }
-      });
+      // Vérifier que le thème existe (les orthophonistes ont accès à tous les thèmes)
+      const theme = await Theme.findByPk(themeId);
+
+      console.log('Thème trouvé:', theme ? { id: theme.id, name: theme.name } : null);
 
       if (!theme) {
-        return res.status(403).json({
+        return res.status(404).json({
           success: false,
-          message: "Vous n'avez pas accès à ce thème"
+          message: "Thème non trouvé"
         });
       }
 
-      // Vérifier que le patient existe
-      const patient = await Patient.findByPk(patientId);
-      if (!patient) {
-        return res.status(404).json({
-          success: false,
-          message: "Patient non trouvé"
-        });
-      }
+      console.log('Création de UserTheme avec userId:', patient.userId, 'themeId:', themeId);
 
       // Créer l'association entre le patient et le thème via UserTheme
       await UserTheme.create({
@@ -419,12 +432,18 @@ const themeController = {
         themeId: themeId
       });
 
+      console.log('UserTheme créé avec succès');
+      console.log('=== FIN DEBUG grantAccess ===');
+
       res.json({
         success: true,
         message: "Accès accordé avec succès"
       });
     } catch (error) {
-      console.error('Erreur lors de l\'attribution de l\'accès:', error);
+      console.error('=== ERREUR grantAccess ===');
+      console.error('Message:', error.message);
+      console.error('Stack:', error.stack);
+      console.error('=== FIN ERREUR ===');
       res.status(500).json({
         success: false,
         message: "Erreur lors de l'attribution de l'accès",
@@ -436,45 +455,42 @@ const themeController = {
   revokeAccess: async (req, res) => {
     try {
       const { themeId, patientId } = req.body;
-      const therapistId = req.user.id;
+      const userEmail = req.user.email;
+
+      // Récupérer l'orthophoniste correspondant à cet email
+      const orthophoniste = await Orthophoniste.findOne({
+        where: { email: userEmail }
+      });
+
+      if (!orthophoniste) {
+        return res.status(403).json({
+          success: false,
+          message: "Orthophoniste non trouvé"
+        });
+      }
 
       // Vérifier que l'orthophoniste a accès au patient
-      const hasAccess = await db.sequelize.query(
-        'SELECT * FROM patient_therapists WHERE patient_id = ? AND therapist_id = ?',
-        {
-          replacements: [patientId, therapistId],
-          type: db.sequelize.QueryTypes.SELECT
+      const patient = await Patient.findOne({
+        where: {
+          id: patientId,
+          orthophonisteId: orthophoniste.id
         }
-      );
+      });
 
-      if (!hasAccess || hasAccess.length === 0) {
+      if (!patient) {
         return res.status(403).json({
           success: false,
           message: "Vous n'avez pas accès à ce patient"
         });
       }
 
-      // Vérifier que le thème appartient à l'orthophoniste
-      const theme = await Theme.findOne({
-        where: {
-          id: themeId,
-          createdBy: therapistId
-        }
-      });
+      // Vérifier que le thème existe (les orthophonistes ont accès à tous les thèmes)
+      const theme = await Theme.findByPk(themeId);
 
       if (!theme) {
-        return res.status(403).json({
-          success: false,
-          message: "Vous n'avez pas accès à ce thème"
-        });
-      }
-
-      // Vérifier que le patient existe
-      const patient = await Patient.findByPk(patientId);
-      if (!patient) {
         return res.status(404).json({
           success: false,
-          message: "Patient non trouvé"
+          message: "Thème non trouvé"
         });
       }
 
