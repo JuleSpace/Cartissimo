@@ -1,21 +1,44 @@
 <template>
   <div class="animation-container">
-    <div class="animation-header">
-      <div class="header-content">
-        <h1 class="animation-title">{{ currentTheme?.name }}</h1>
-        <p class="animation-description">{{ currentTheme?.description }}</p>
+    <!-- Version mobile -->
+    <div v-if="isMobile && currentAnimation" class="mobile-view">
+      <div class="mobile-header">
+        <h1 class="mobile-title">{{ currentTheme?.name }}</h1>
+        <p class="mobile-description">{{ currentTheme?.description }}</p>
       </div>
+      
+      <MobileAnimationViewer
+        :current-animation="currentAnimation"
+        :animations="animations"
+        :current-animation-index="currentAnimationIndex"
+        :get-image-path="getImagePath"
+        :current-sound="currentSound"
+        :audio-player="audioPlayer"
+        @play-sound="playSound"
+        @next-animation="nextAnimation"
+        @previous-animation="previousAnimation"
+        @go-back="goBack"
+      />
     </div>
 
-    <div v-if="loading" class="loading-state">
-      <span>Chargement des animations...</span>
-    </div>
+    <!-- Version desktop (existante) -->
+    <div v-else>
+      <div class="animation-header">
+        <div class="header-content">
+          <h1 class="animation-title">{{ currentTheme?.name }}</h1>
+          <p class="animation-description">{{ currentTheme?.description }}</p>
+        </div>
+      </div>
 
-    <div v-else-if="error" class="error-state">
-      <p>{{ error }}</p>
-    </div>
+      <div v-if="loading" class="loading-state">
+        <span>Chargement des animations...</span>
+      </div>
 
-    <div v-else class="animation-content">
+      <div v-else-if="error" class="error-state">
+        <p>{{ error }}</p>
+      </div>
+
+      <div v-else class="animation-content">
       <div class="main-animation">
         <div class="animation-display">
           <div class="animation-images-container">
@@ -79,6 +102,7 @@
         </div>
       </div>
     </div>
+    </div>
     
     <audio ref="audioPlayer" :src="currentSound" preload="auto"></audio>
   </div>
@@ -89,13 +113,20 @@ import { ref, computed } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter, useRoute } from 'vue-router';
 import { SERVER_BASE_URL } from '@/config';
+import MobileAnimationViewer from '@/components/MobileAnimationViewer.vue';
+import { useDeviceDetection } from '@/composables/useDeviceDetection';
 
 export default {
   name: 'AnimationViewer',
+  components: {
+    MobileAnimationViewer
+  },
   setup() {
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
+    
+    const { isMobile } = useDeviceDetection();
     
     const currentTheme = ref(null);
     const currentAnimation = ref(null);
@@ -105,6 +136,11 @@ export default {
     const animations = computed(() => store.state.animations.items);
     const loading = computed(() => store.state.animations.loading);
     const error = computed(() => store.state.animations.error);
+    
+    const currentAnimationIndex = computed(() => {
+      if (!currentAnimation.value || !animations.value || !Array.isArray(animations.value)) return 0;
+      return animations.value.findIndex(a => a.id === currentAnimation.value.id);
+    });
     
     const hasPrevious = computed(() => {
       if (!currentAnimation.value || !animations.value || !Array.isArray(animations.value)) return false;
