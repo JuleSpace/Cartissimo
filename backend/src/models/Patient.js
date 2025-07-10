@@ -60,6 +60,15 @@ module.exports = (sequelize) => {
     stripeSubscriptionId: {
       type: DataTypes.STRING,
       allowNull: true
+    },
+    orthophonisteId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: 'orthophoniste_id',
+      references: {
+        model: 'Orthophonistes',
+        key: 'id'
+      }
     }
   }, {
     sequelize,

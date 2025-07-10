@@ -234,8 +234,10 @@ export default {
     fetchData();
 
     return {
+      isMobile,
       currentTheme,
       currentAnimation,
+      currentAnimationIndex,
       animations,
       loading,
       error,
@@ -260,6 +262,43 @@ export default {
   padding-top: 80px;
   max-width: 1400px;
   margin: 0 auto;
+}
+
+/* Styles pour la version mobile */
+.mobile-view {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-header {
+  text-align: center;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.mobile-title {
+  color: var(--blue);
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.mobile-description {
+  color: var(--text-primary);
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .animation-container {
+    padding: 10px;
+    padding-top: 70px;
+  }
 }
 
 .animation-header {

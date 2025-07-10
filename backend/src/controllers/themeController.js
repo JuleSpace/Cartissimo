@@ -254,8 +254,8 @@ const themeController = {
         return res.status(404).json({ message: 'Thème non trouvé' });
       }
 
-      // Vérifier les permissions
-      if (req.user.role !== 'admin' && theme.createdBy !== req.user.id) {
+      // Vérifier les permissions - admins, créateurs, ou orthophonistes pour thèmes orphelins
+      if (req.user.role !== 'admin' && theme.createdBy !== req.user.id && theme.createdBy !== null) {
         return res.status(403).json({ message: 'Non autorisé' });
       }
 
@@ -280,8 +280,8 @@ const themeController = {
         return res.status(404).json({ message: 'Thème non trouvé' });
       }
 
-      // Vérifier les permissions
-      if (req.user.role !== 'admin' && theme.createdBy !== req.user.id) {
+      // Vérifier les permissions - admins, créateurs, ou orthophonistes pour thèmes orphelins
+      if (req.user.role !== 'admin' && theme.createdBy !== req.user.id && theme.createdBy !== null) {
         return res.status(403).json({ message: 'Non autorisé' });
       }
 

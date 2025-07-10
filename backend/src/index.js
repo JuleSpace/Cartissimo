@@ -56,7 +56,7 @@ app.use('/api/themes', themeRoutes);
 app.use('/api/animations', animationRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/payments', paymentRoutes);
-app.use('/api/orthophonistes', orthoRoutes);
+app.use('/api/ortho', orthoRoutes);
 
 // Servir les fichiers statiques
 app.use('/public', express.static(path.join(__dirname, '../public')));

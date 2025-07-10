@@ -51,7 +51,7 @@ module.exports = (sequelize) => {
     },
     createdBy: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: true
     }
   }, {
     sequelize,

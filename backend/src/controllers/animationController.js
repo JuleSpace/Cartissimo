@@ -90,10 +90,10 @@ const animationController = {
         }
       });
 
-      // Si l'utilisateur n'a pas accès via UserTheme, vérifier s'il est le créateur du thème
+      // Si l'utilisateur n'a pas accès via UserTheme, vérifier s'il est le créateur du thème ou si c'est un thème orphelin
       if (!userTheme) {
         const theme = await Theme.findByPk(themeId);
-        if (!theme || theme.createdBy !== req.user.id) {
+        if (!theme || (theme.createdBy !== req.user.id && theme.createdBy !== null)) {
           return res.status(403).json({ error: 'Accès non autorisé au thème' });
         }
       }
@@ -212,8 +212,8 @@ const animationController = {
         // Les admins ont accès à tous les thèmes
         hasAccess = true;
       } else if (req.user.role === 'orthophonist') {
-        // Les orthophonistes ont accès à leurs thèmes et aux thèmes approuvés
-        hasAccess = theme.createdBy === req.user.id || theme.status === 'approved';
+        // Les orthophonistes ont accès à leurs thèmes, aux thèmes approuvés, et aux thèmes orphelins (createdBy = null)
+        hasAccess = theme.createdBy === req.user.id || theme.status === 'approved' || theme.createdBy === null;
       } else {
         // Les parents ont accès aux thèmes auxquels ils sont liés
         const userTheme = await UserTheme.findOne({
@@ -376,12 +376,13 @@ const animationController = {
           }]
         });
       } else if (req.user.role === 'orthophonist') {
-        // Les orthophonistes voient leurs animations et les animations approuvées
+        // Les orthophonistes voient leurs animations, les animations approuvées, et les animations orphelines
         animations = await Animation.findAll({
           where: {
             [Op.or]: [
               { createdBy: req.user.id },
-              { status: 'approved' }
+              { status: 'approved' },
+              { createdBy: null }
             ]
           },
           include: [{
