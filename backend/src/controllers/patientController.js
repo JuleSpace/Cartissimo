@@ -1,6 +1,4 @@
-const { Patient, User, Orthophoniste, patient_therapists } = require('../models');
-const { Op, Sequelize } = require('sequelize');
-const sequelize = require('sequelize');
+const { Patient, User, Orthophoniste, ThemeCompletion, Theme } = require('../models');
 
 const patientController = {
   getPatients: async (req, res) => {
@@ -20,13 +18,11 @@ const patientController = {
         return res.json([]);
       }
 
-      console.log('Orthophoniste trouvé:', { id: orthophoniste.id, firstName: orthophoniste.firstName, lastName: orthophoniste.lastName });
-
-      // Debug: voir tous les patients en base
-      const allPatients = await Patient.findAll({
-        attributes: ['id', 'firstName', 'lastName', 'orthophonisteId']
+      console.log('Orthophoniste trouvé:', {
+        id: orthophoniste.id,
+        firstName: orthophoniste.firstName,
+        lastName: orthophoniste.lastName
       });
-      console.log('Tous les patients en base:', allPatients.map(p => ({ id: p.id, name: p.firstName + ' ' + p.lastName, orthophonisteId: p.orthophonisteId })));
 
       // Récupérer tous les patients liés à cet orthophoniste
       const patients = await Patient.findAll({
@@ -36,12 +32,19 @@ const patientController = {
         include: [{
           model: User,
           as: 'parent',
-          attributes: ['id', 'firstName', 'lastName', 'email']
+          attributes: ['id', 'firstName', 'lastName', 'email'],
+          include: [{
+            model: ThemeCompletion,
+            as: 'themeCompletions', // Doit correspondre à l'alias dans User.js
+            include: [{
+              model: Theme,
+              attributes: ['id', 'name']
+            }]
+          }]
         }]
       });
 
       console.log('Nombre de patients trouvés:', patients.length);
-      console.log('Patients:', patients.map(p => ({ id: p.id, name: p.firstName + ' ' + p.lastName, orthophonisteId: p.orthophonisteId })));
       console.log('=== FIN DEBUG ===');
 
       res.json(patients);
@@ -56,4 +59,4 @@ const patientController = {
   }
 };
 
-module.exports = patientController; 
+module.exports = patientController;

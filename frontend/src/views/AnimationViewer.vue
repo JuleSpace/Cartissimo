@@ -109,12 +109,12 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue';
-import { useStore } from 'vuex';
-import { useRouter, useRoute } from 'vue-router';
-import { SERVER_BASE_URL } from '@/config';
 import MobileAnimationViewer from '@/components/MobileAnimationViewer.vue';
 import { useDeviceDetection } from '@/composables/useDeviceDetection';
+import { SERVER_BASE_URL } from '@/config';
+import { computed, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 export default {
   name: 'AnimationViewer',
@@ -132,6 +132,8 @@ export default {
     const currentAnimation = ref(null);
     const audioPlayer = ref(null);
     const currentSound = ref(null);
+    const seenAnimations = ref(new Set());
+    const startTime = ref(Date.now());
     
     const animations = computed(() => store.state.animations.items);
     const loading = computed(() => store.state.animations.loading);
@@ -168,16 +170,24 @@ export default {
         await store.dispatch('animations/fetchAnimations', themeId);
         currentTheme.value = store.state.themes.currentTheme;
         
-        console.log('Animations reçues:', animations.value);
+        // 🟢 Réinitialise les animations vues et le chrono
+        seenAnimations.value.clear();
+        startTime.value = Date.now();
+
+//        console.log('Animations reçues:', animations.value);
         
         if (animations.value && Array.isArray(animations.value) && animations.value.length > 0) {
           currentAnimation.value = animations.value[0];
-          console.log('Animation courante:', currentAnimation.value);
+//          console.log('Animation courante:', currentAnimation.value);
           
+          if (currentAnimation.value) {
+            seenAnimations.value.add(currentAnimation.value.id);
+            checkCompletion();
+          }
           // Préparer le chemin du son
           if (currentAnimation.value.soundPath) {
             currentSound.value = getImagePath(currentAnimation.value.soundPath);
-            console.log('Chemin du son:', currentSound.value);
+//            console.log('Chemin du son:', currentSound.value);
           }
         } else {
           console.warn('Aucune animation disponible ou format invalide:', animations.value);
@@ -205,6 +215,10 @@ export default {
       if (currentAnimation.value.soundPath) {
         currentSound.value = getImagePath(currentAnimation.value.soundPath);
       }
+      if (!seenAnimations.value.has(currentAnimation.value.id)) {
+        seenAnimations.value.add(currentAnimation.value.id);
+        checkCompletion();
+      }
     };
 
     const nextAnimation = () => {
@@ -216,6 +230,10 @@ export default {
       if (currentAnimation.value.soundPath) {
         currentSound.value = getImagePath(currentAnimation.value.soundPath);
       }
+      if (!seenAnimations.value.has(currentAnimation.value.id)) {
+        seenAnimations.value.add(currentAnimation.value.id);
+        checkCompletion();
+      }
     };
 
     const selectAnimation = (animation) => {
@@ -224,11 +242,62 @@ export default {
       if (animation.soundPath) {
         currentSound.value = getImagePath(animation.soundPath);
       }
+      if (!seenAnimations.value.has(animation.id)) {
+        seenAnimations.value.add(animation.id);
+        checkCompletion();
+      }
     };
 
     const goBack = () => {
       router.push('/themes');
     };
+
+    const checkCompletion = async () => {
+      console.log('🟡 checkCompletion appelé');
+      console.log('Vues :', seenAnimations.value.size, '/', animations.value.length);
+
+      const allSeen = animations.value.length > 0 &&
+                      seenAnimations.value.size === animations.value.length;
+
+      if (allSeen && currentTheme.value?.id) {
+        try {
+          const user = store.getters['auth/currentUser'];
+          if (!user || user.role === 'admin' || user.role === 'therapist') return;
+
+          const now = Date.now();
+          const elapsed = now - (startTime.value || now);
+          const duration = Math.floor(elapsed / 1000);
+
+          if (isNaN(duration) || duration < 0) {
+            console.warn('❌ Durée invalide, abandon de l’envoi :', duration);
+            return;
+          }
+
+          console.log('🟢 Envoi de la complétion :', {
+            themeId: currentTheme.value.id,
+            userId: user.id,
+            duration
+          });
+
+          await fetch(`${SERVER_BASE_URL}/api/theme-completions`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${store.state.auth.token}`
+            },
+            body: JSON.stringify({
+              themeId: currentTheme.value.id,
+              userId: user.id
+            })
+          });
+
+          console.log('✅ ThemeCompletion enregistrée');
+        } catch (err) {
+          console.error('❌ Erreur lors de l’enregistrement de la complétion :', err);
+        }
+      }
+    };
+
 
     // Charger les données au montage
     fetchData();

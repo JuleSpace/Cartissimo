@@ -3,19 +3,23 @@ const { Model, DataTypes } = require('sequelize');
 module.exports = (sequelize) => {
   class Patient extends Model {
     static associate(models) {
+      // Lien vers le parent
       Patient.belongsTo(models.User, {
         foreignKey: 'userId',
         as: 'parent'
       });
+
+      // Lien vers l'orthophoniste
       Patient.belongsTo(models.Orthophoniste, {
         foreignKey: 'orthophonisteId',
         as: 'orthophoniste'
       });
-      
+
+      // Lien vers les thérapeutes (utilisateurs)
       Patient.belongsToMany(models.User, {
         through: 'PatientTherapists',
-        foreignKey: 'patientId',
-        otherKey: 'therapistId',
+        foreignKey: 'patientId',      // <- Patient.id
+        otherKey: 'therapistId',      // <- User.id (en tant que thérapeute)
         as: 'therapists'
       });
     }
@@ -79,4 +83,4 @@ module.exports = (sequelize) => {
   });
 
   return Patient;
-}; 
+};
