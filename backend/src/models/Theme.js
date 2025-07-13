@@ -20,6 +20,10 @@ module.exports = (sequelize) => {
         foreignKey: 'createdBy',
         as: 'creator'
       });
+      Theme.hasMany(models.ThemeCompletion, { 
+        foreignKey: 'themeId',
+        onDelete: 'CASCADE'
+      });
     }
   }
 

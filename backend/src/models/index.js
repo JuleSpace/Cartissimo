@@ -9,14 +9,20 @@ const Animation = require('./Animation')(sequelize, DataTypes);
 const UserTheme = require('./UserTheme')(sequelize, DataTypes);
 const patient_therapists = require('./PatientTherapist')(sequelize, DataTypes);
 const Orthophoniste = require('./Orthophoniste')(sequelize, DataTypes);
+const ThemeCompletion = require('./ThemeCompletion')(sequelize, DataTypes); // ← ajout ici
 
 // Définition des associations
-User.associate({ User, Patient, Theme, Animation, UserTheme, patient_therapists, Orthophoniste });
-Patient.associate({ User, Patient, Theme, Animation, UserTheme, patient_therapists, Orthophoniste });
-Theme.associate({ User, Patient, Theme, Animation, UserTheme, patient_therapists, Orthophoniste });
-Animation.associate({ User, Patient, Theme, Animation, UserTheme, patient_therapists, Orthophoniste });
-UserTheme.associate({ User, Patient, Theme, Animation, UserTheme, patient_therapists, Orthophoniste });
-Orthophoniste.associate({ User, Patient, Theme, Animation, UserTheme, patient_therapists, Orthophoniste });
+User.associate({ User, Patient, Theme, Animation, UserTheme, patient_therapists, Orthophoniste, ThemeCompletion });
+Patient.associate({ User, Patient, Theme, Animation, UserTheme, patient_therapists, Orthophoniste, ThemeCompletion });
+Theme.associate({ User, Patient, Theme, Animation, UserTheme, patient_therapists, Orthophoniste, ThemeCompletion });
+Animation.associate({ User, Patient, Theme, Animation, UserTheme, patient_therapists, Orthophoniste, ThemeCompletion });
+UserTheme.associate({ User, Patient, Theme, Animation, UserTheme, patient_therapists, Orthophoniste, ThemeCompletion });
+Orthophoniste.associate({ User, Patient, Theme, Animation, UserTheme, patient_therapists, Orthophoniste, ThemeCompletion });
+ThemeCompletion.associate({ User, Patient, Theme, Animation, UserTheme, patient_therapists, Orthophoniste, ThemeCompletion });
+
+
+// Si tu veux ajouter une association dans ThemeCompletion.js plus tard
+// ThemeCompletion.associate({...})
 
 module.exports = {
   sequelize,
@@ -26,5 +32,6 @@ module.exports = {
   Animation,
   UserTheme,
   patient_therapists,
-  Orthophoniste
+  Orthophoniste,
+  ThemeCompletion // ← export ici
 };

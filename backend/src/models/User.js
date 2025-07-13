@@ -23,6 +23,11 @@ module.exports = (sequelize) => {
         foreignKey: 'createdBy',
         as: 'animations'
       });
+      User.hasMany(models.ThemeCompletion, {
+        foreignKey: 'userId',
+        as: 'themeCompletions' // ou sans `as` si tu n’en utilises pas ailleurs
+      });
+
     }
 
     validPassword(password) {
