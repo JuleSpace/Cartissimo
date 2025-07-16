@@ -17,6 +17,13 @@
         Gestion des thèmes
       </button>
       <button 
+        @click="currentSection = 'theme-order'" 
+        :class="['nav-button', { active: currentSection === 'theme-order' }]"
+      >
+        <span class="nav-icon">🔢</span>
+        Ordre des thèmes
+      </button>
+      <button 
         @click="currentSection = 'orthophonistes'" 
         :class="['nav-button', { active: currentSection === 'orthophonistes' }]"
       >
@@ -58,6 +65,11 @@
         </div>
       </section>
 
+      <!-- Section de l'ordre des thèmes -->
+      <section v-if="currentSection === 'theme-order'" class="admin-section">
+        <ThemeOrderManager />
+      </section>
+
       <!-- Section des orthophonistes -->
       <section v-if="currentSection === 'orthophonistes'" class="admin-section">
         <OrthophonisteManagement ref="orthophonisteManagementRef" />
@@ -76,12 +88,14 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useStore } from 'vuex';
 import OrthophonisteManagement from '@/components/OrthophonisteManagement.vue';
 import UnassignedPatients from '@/components/UnassignedPatients.vue';
+import ThemeOrderManager from '@/components/ThemeOrderManager.vue';
 
 export default {
   name: 'AdminPanel',
   components: {
     OrthophonisteManagement,
-    UnassignedPatients
+    UnassignedPatients,
+    ThemeOrderManager
   },
   setup() {
     const store = useStore();

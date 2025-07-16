@@ -150,6 +150,7 @@ const seedDatabase = async () => {
         createdBy: 2,
         status: 'approved',
         image: '/images/themes/ferme.jpg',
+        order: 1
       },
       {
         name: 'Véhicules',
@@ -157,6 +158,7 @@ const seedDatabase = async () => {
         createdBy: 2,
         status: 'approved',
         image: '/images/themes/vehicules.jpg',
+        order: 2
       },
       {
         name: 'Animaux domestiques',
@@ -164,6 +166,7 @@ const seedDatabase = async () => {
         createdBy: 4,
         status: 'approved',
         image: '/images/themes/domestiques.png',
+        order: 3
       },
       {
         name: 'Instruments de musique',
@@ -171,6 +174,7 @@ const seedDatabase = async () => {
         createdBy: 2,
         status: 'approved',
         image: '/images/themes/instruments.jpg',
+        order: 4
       },
       {
         name: 'Animaux de la savane',
@@ -178,6 +182,7 @@ const seedDatabase = async () => {
         createdBy: 4,
         status: 'approved',
         image: '/images/themes/savane.jpg',
+        order: 5
       },
       {
         name: 'Outils/Electroménagers',
@@ -185,6 +190,7 @@ const seedDatabase = async () => {
         createdBy: 2,
         status: 'approved',
         image: '/images/themes/outils.jpg',
+        order: 6
       },
       {
         name: 'Animaux sauvages',
@@ -192,6 +198,7 @@ const seedDatabase = async () => {
         createdBy: 4,
         status: 'approved',
         image: '/images/themes/sauvages.jpg',
+        order: 7
       },
       {
         name: 'Animaux marins',
@@ -199,6 +206,7 @@ const seedDatabase = async () => {
         createdBy: 2,
         status: 'approved',
         image: '/images/themes/marins.jpg',
+        order: 8
       }
     ]);
 
@@ -724,7 +732,7 @@ const seedDatabase = async () => {
         createdBy: 2
       },
       {
-        name: 'Maracas',
+        name: 'Maracascd',
         description: 'Animation d\'une maracas',
         animatedGifPath: '/animations/instruments/maracas_anime.gif',
         realGifPath: '/animations/instruments/maracas_reel.gif',

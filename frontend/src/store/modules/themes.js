@@ -243,6 +243,43 @@ export default {
       } finally {
         commit('SET_LOADING', false);
       }
+    },
+    async fetchParentThemes({ commit, rootState }) {
+      console.log('Début de fetchParentThemes avec déverrouillage progressif');
+      
+      commit('SET_LOADING', true);
+      commit('SET_ERROR', null);
+
+      try {
+        console.log('Envoi de la requête à:', `${API_URL}/themes/parent/themes`);
+        const response = await axios.get(`${API_URL}/themes/parent/themes`, {
+          headers: {
+            Authorization: `Bearer ${rootState.auth.token}`
+          }
+        });
+        console.log('Réponse reçue:', response.data);
+        
+        if (response.data.success) {
+          commit('SET_THEMES', response.data.themes);
+          return response.data.themes;
+        } else {
+          throw new Error(response.data.message || 'Erreur lors de la récupération des thèmes');
+        }
+      } catch (error) {
+        console.error('Erreur détaillée:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
+        
+        // Si c'est une erreur 403, c'est probablement que l'abonnement est requis
+        if (error.response?.status !== 403) {
+          commit('SET_ERROR', error.response?.data?.message || 'Erreur lors de la récupération des thèmes');
+        }
+        throw error;
+      } finally {
+        commit('SET_LOADING', false);
+      }
     }
   },
   getters: {

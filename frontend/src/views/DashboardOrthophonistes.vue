@@ -2,6 +2,9 @@
   <div class="dashboard-ortho">
     <div class="header">
       <h1>Liste de vos Patients</h1>
+      <button @click="goToThemes" class="themes-button">
+        ← Retour aux thèmes
+      </button>
     </div>
 
     <!-- Statistiques globales -->
@@ -76,15 +79,21 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 
 const selectedPatient = ref(null);
 const showModal = ref(false);
 const store = useStore();
+const router = useRouter();
 const patients = ref([]);
 const loading = ref(false);
 const error = ref(null);
 
 const currentUser = computed(() => store.getters['auth/currentUser']);
+
+const goToThemes = () => {
+  router.push('/themes');
+};
 
 const openDetails = (patient) => {
   selectedPatient.value = patient;
@@ -161,11 +170,32 @@ const expiredCount = computed(() =>
 .header {
   padding: 0 0.5rem;
   margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .header h1 {
   font-size: 1.5rem;
   margin-bottom: 0.25rem;
+}
+
+.themes-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.themes-button:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
 .stats-summary {

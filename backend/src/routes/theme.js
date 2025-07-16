@@ -27,4 +27,11 @@ router.post('/grant-access', themeController.grantAccess);
 router.post('/revoke-access', themeController.revokeAccess);
 router.get('/user/:userId', checkSubscription, themeController.getUserThemes);
 
+// Routes pour la gestion de l'ordre des thèmes (admins uniquement)
+router.get('/admin/themes-order', themeController.getThemesWithOrder);
+router.post('/admin/update-order', themeController.updateThemeOrder);
+
+// Route pour les parents avec déverrouillage progressif
+router.get('/parent/themes', checkSubscription, themeController.getParentThemes);
+
 module.exports = router; 

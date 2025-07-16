@@ -84,7 +84,8 @@ const themeController = {
                 as: 'animations',
                 attributes: ['id', 'name', 'description', 'animatedGifPath', 'realGifPath', 'soundPath', 'duration', 'width', 'height', 'status']
               }
-            ]
+            ],
+            order: [['order', 'ASC'], ['createdAt', 'ASC']]
           });
         } else if (user.role === 'orthophonist') {
           console.log('Récupération des thèmes pour orthophoniste');
@@ -101,7 +102,8 @@ const themeController = {
                 as: 'animations',
                 attributes: ['id', 'name', 'description', 'animatedGifPath', 'realGifPath', 'soundPath', 'duration', 'width', 'height', 'status']
               }
-            ]
+            ],
+            order: [['order', 'ASC'], ['createdAt', 'ASC']]
           });
         } else {
           console.log('Récupération des thèmes pour parent');
@@ -596,6 +598,186 @@ const themeController = {
       res.json(themes);
     } catch (error) {
       console.error('Erreur lors de la récupération des thèmes:', error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur lors de la récupération des thèmes",
+        error: error.message
+      });
+    }
+  },
+
+  // Méthode pour récupérer tous les thèmes avec leur ordre (pour les admins)
+  getThemesWithOrder: async (req, res) => {
+    try {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({
+          success: false,
+          message: "Accès non autorisé"
+        });
+      }
+
+      const themes = await Theme.findAll({
+        order: [['order', 'ASC'], ['createdAt', 'ASC']],
+        attributes: ['id', 'name', 'description', 'order', 'status', 'createdAt']
+      });
+
+      res.json({
+        success: true,
+        themes
+      });
+    } catch (error) {
+      console.error('Erreur lors de la récupération des thèmes avec ordre:', error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur lors de la récupération des thèmes",
+        error: error.message
+      });
+    }
+  },
+
+  // Méthode pour mettre à jour l'ordre des thèmes (pour les admins)
+  updateThemeOrder: async (req, res) => {
+    try {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({
+          success: false,
+          message: "Accès non autorisé"
+        });
+      }
+
+      const { themeOrders } = req.body; // Array d'objets { id, order }
+
+      if (!Array.isArray(themeOrders)) {
+        return res.status(400).json({
+          success: false,
+          message: "Format invalide. Attendu: array d'objets { id, order }"
+        });
+      }
+
+      // Mettre à jour l'ordre de chaque thème
+      const promises = themeOrders.map(async (themeOrder) => {
+        const { id, order } = themeOrder;
+        return await Theme.update(
+          { order: order },
+          { where: { id: id } }
+        );
+      });
+
+      await Promise.all(promises);
+
+      res.json({
+        success: true,
+        message: "Ordre des thèmes mis à jour avec succès"
+      });
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour de l\'ordre des thèmes:', error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur lors de la mise à jour de l'ordre des thèmes",
+        error: error.message
+      });
+    }
+  },
+
+  // Méthode pour gérer l'accès automatique des parents aux thèmes
+  getParentThemes: async (req, res) => {
+    try {
+      const user = req.user;
+      
+      if (user.role !== 'parent') {
+        return res.status(403).json({
+          success: false,
+          message: "Accès réservé aux parents"
+        });
+      }
+
+      // Récupérer tous les thèmes ordonnés
+      const allThemes = await Theme.findAll({
+        where: { status: 'approved' },
+        order: [['order', 'ASC'], ['createdAt', 'ASC']],
+        include: [{
+          model: Animation,
+          as: 'animations',
+          attributes: ['id', 'name', 'description', 'animatedGifPath', 'realGifPath', 'soundPath', 'duration', 'width', 'height', 'status']
+        }]
+      });
+
+      // Récupérer les thèmes déjà complétés par l'utilisateur
+      const { ThemeCompletion } = require('../models');
+      const completedThemes = await ThemeCompletion.findAll({
+        where: { userId: user.id },
+        attributes: ['themeId']
+      });
+
+      const completedThemeIds = completedThemes.map(ct => ct.themeId);
+
+      // Récupérer les thèmes auxquels l'utilisateur a déjà accès
+      const userThemes = await UserTheme.findAll({
+        where: { userId: user.id },
+        attributes: ['themeId']
+      });
+
+      const accessibleThemeIds = userThemes.map(ut => ut.themeId);
+
+      // Logique de déverrouillage progressif
+      let availableThemes = [];
+      
+      for (let i = 0; i < allThemes.length; i++) {
+        const theme = allThemes[i];
+        
+        // Les 2 premiers thèmes sont automatiquement disponibles
+        if (i < 2) {
+          availableThemes.push({
+            ...theme.toJSON(),
+            isUnlocked: true,
+            isCompleted: completedThemeIds.includes(theme.id),
+            unlockReason: 'Thème de base'
+          });
+          
+          // S'assurer que l'utilisateur a accès à ces thèmes
+          if (!accessibleThemeIds.includes(theme.id)) {
+            await UserTheme.create({
+              userId: user.id,
+              themeId: theme.id
+            });
+          }
+        } else {
+          // Pour les thèmes suivants, vérifier si le thème précédent est complété
+          const previousTheme = allThemes[i - 1];
+          const isPreviousCompleted = completedThemeIds.includes(previousTheme.id);
+          
+          if (isPreviousCompleted) {
+            availableThemes.push({
+              ...theme.toJSON(),
+              isUnlocked: true,
+              isCompleted: completedThemeIds.includes(theme.id),
+              unlockReason: `Débloqué après avoir complété "${previousTheme.name}"`
+            });
+            
+            // S'assurer que l'utilisateur a accès à ce thème
+            if (!accessibleThemeIds.includes(theme.id)) {
+              await UserTheme.create({
+                userId: user.id,
+                themeId: theme.id
+              });
+            }
+          } else {
+            availableThemes.push({
+              ...theme.toJSON(),
+              isUnlocked: false,
+              isCompleted: false,
+              unlockReason: `Complétez "${previousTheme.name}" pour débloquer ce thème`
+            });
+          }
+        }
+      }
+
+      res.json({
+        success: true,
+        themes: availableThemes
+      });
+    } catch (error) {
+      console.error('Erreur lors de la récupération des thèmes parent:', error);
       res.status(500).json({
         success: false,
         message: "Erreur lors de la récupération des thèmes",

@@ -25,7 +25,12 @@
       </div>
 
       <div v-else class="themes-grid">
-        <div v-for="theme in filteredThemes" :key="theme.id" class="theme-card">
+        <div v-for="(theme, index) in filteredThemes" :key="theme.id" class="theme-card" :class="{ 'locked': userRole === 'parent' && !theme.isUnlocked }">
+          <!-- Affichage de l'ordre pour tous les utilisateurs -->
+          <div class="theme-order-badge">
+            {{ theme.order || (index + 1) }}
+          </div>
+          
           <img v-if="theme.image" :src="getImagePath(theme.image)" :alt="theme.name" class="theme-image"/>
           <h2>{{ theme.name }}</h2>
           <p>{{ theme.description }}</p>
@@ -33,9 +38,21 @@
             <span class="category">{{ theme.category }}</span>
             <span v-if="theme.status === 'pending'" class="pending">En attente d'approbation</span>
             <span v-if="theme.status === 'rejected'" class="rejected">Rejeté</span>
+            
+            <!-- Informations de déverrouillage pour les parents -->
+            <div v-if="userRole === 'parent'" class="unlock-info">
+              <span v-if="theme.isCompleted" class="completed">✅ Complété</span>
+              <span v-else-if="theme.isUnlocked" class="unlocked">🔓 Débloqué</span>
+              <span v-else class="locked-status">🔒 Verrouillé</span>
+              <p v-if="theme.unlockReason" class="unlock-reason">{{ theme.unlockReason }}</p>
+            </div>
           </div>
-          <button @click="viewAnimations(theme.id)" class="view-button">
-            Voir les animations
+          <button 
+            @click="viewAnimations(theme.id)" 
+            class="view-button"
+            :disabled="userRole === 'parent' && !theme.isUnlocked"
+          >
+            {{ userRole === 'parent' && !theme.isUnlocked ? 'Verrouillé' : 'Voir les animations' }}
           </button>
           <button v-if="userRole === 'orthophonist'" @click="manageAccess(theme.id)" class="access-button">
             Gérer les accès
@@ -106,7 +123,12 @@ export default {
     
     onMounted(async () => {
       try {
-        await store.dispatch('themes/fetchThemes');
+        // Utiliser la nouvelle action pour les parents avec déverrouillage progressif
+        if (userRole.value === 'parent') {
+          await store.dispatch('themes/fetchParentThemes');
+        } else {
+          await store.dispatch('themes/fetchThemes');
+        }
       } catch (err) {
         // Si c'est une erreur 403, c'est que l'abonnement est requis
         // Le SubscriptionManager va gérer cela
@@ -218,10 +240,29 @@ export default {
   padding: 1.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
+  position: relative;
 }
 
 .theme-card:hover {
   transform: translateY(-2px);
+}
+
+.theme-order-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+  z-index: 1;
 }
 
 .theme-card h2 {
@@ -276,5 +317,60 @@ export default {
 
 .error {
   color: #D32F2F;
+}
+
+/* Styles pour le déverrouillage progressif */
+.theme-card.locked {
+  opacity: 0.6;
+  background: #f8f9fa;
+  border: 2px dashed #ccc;
+}
+
+.theme-card.locked .theme-image {
+  filter: grayscale(100%);
+}
+
+.unlock-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.unlock-info .completed {
+  color: #28a745;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.unlock-info .unlocked {
+  color: #007bff;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.unlock-info .locked-status {
+  color: #6c757d;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.unlock-info .unlock-reason {
+  color: #6c757d;
+  font-size: 0.8rem;
+  font-style: italic;
+  margin: 0;
+}
+
+.view-button:disabled {
+  background: #6c757d;
+  color: #fff;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.view-button:disabled:hover {
+  transform: none;
+  box-shadow: none;
 }
 </style> 
