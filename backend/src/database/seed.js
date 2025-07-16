@@ -724,11 +724,11 @@ const seedDatabase = async () => {
         createdBy: 2
       },
       {
-        name: 'Clochette',
-        description: 'Animation d\'une clochette',
-        animatedGifPath: '/animations/instruments/clochette_anime.gif',
-        realGifPath: '/animations/instruments/clochette_reel.gif',
-        soundPath: '/sounds/instruments/clochette.mp3',
+        name: 'Maracas',
+        description: 'Animation d\'une maracas',
+        animatedGifPath: '/animations/instruments/maracas_anime.gif',
+        realGifPath: '/animations/instruments/maracas_reel.gif',
+        soundPath: '/sounds/instruments/maracas.mp3',
         duration: 2000,
         width: 300,
         height: 300,
