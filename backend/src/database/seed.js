@@ -732,7 +732,7 @@ const seedDatabase = async () => {
         createdBy: 2
       },
       {
-        name: 'Maracascd',
+        name: 'Maracas',
         description: 'Animation d\'une maracas',
         animatedGifPath: '/animations/instruments/maracas_anime.gif',
         realGifPath: '/animations/instruments/maracas_reel.gif',
