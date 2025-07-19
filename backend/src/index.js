@@ -113,24 +113,32 @@ if (process.env.NODE_ENV === 'production') {
       console.log('❌ index.html manquant !');
     }
     
-    // Servir les fichiers statiques avec cache
+    // Servir les fichiers statiques avec cache - AVANT le catch-all
     app.use(express.static(frontendPath, {
       maxAge: '1h',
-      etag: false
+      etag: false,
+      index: false  // Important : ne pas servir index.html automatiquement
     }));
     
-    // Route catch-all pour les applications SPA - DOIT être à la fin
+    // Route catch-all pour les applications SPA - SEULEMENT pour les routes sans extension
     app.get('*', (req, res, next) => {
-      // Ne pas intercepter les routes API et assets
+      // Laisser passer les routes API
       if (req.path.startsWith('/api/') || 
           req.path.startsWith('/public/') || 
           req.path.startsWith('/animations/') || 
           req.path.startsWith('/sounds/') || 
-          req.path.startsWith('/images/') ||
-          req.path.includes('.')) { // Fichiers avec extension
-        return next(); // Continuer vers le middleware suivant
+          req.path.startsWith('/images/')) {
+        return next();
       }
       
+      // Laisser passer tous les fichiers avec extension (js, css, png, etc.)
+      const hasFileExtension = /\.[a-zA-Z0-9]+$/.test(req.path);
+      if (hasFileExtension) {
+        console.log('📎 Fichier statique:', req.path);
+        return res.status(404).send('File not found'); // Si le fichier n'existe pas
+      }
+      
+      // Seulement pour les routes SPA (sans extension)
       console.log('📄 Serving SPA pour:', req.path);
       res.sendFile(indexPath, (err) => {
         if (err) {
