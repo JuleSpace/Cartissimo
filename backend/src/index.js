@@ -205,12 +205,26 @@ if (process.env.NODE_ENV === 'production') {
       
       // Seulement pour les routes SPA (sans extension)
       console.log('📄 Serving SPA pour:', req.path);
-      res.sendFile(indexPath, (err) => {
-        if (err) {
-          console.error('❌ Erreur envoi index.html:', err);
-          res.status(500).json({ error: 'Erreur serveur' });
-        }
-      });
+      
+      // Lire index.html à chaque requête (éviter le cache Docker)
+      try {
+        // Forcer la lecture fraîche du fichier
+        const currentContent = fs.readFileSync(indexPath, 'utf8');
+        const currentHash = require('crypto').createHash('md5').update(currentContent).digest('hex').substring(0, 8);
+        console.log('🔄 Lecture fraîche index.html, hash:', currentHash);
+        
+        // Headers anti-cache pour forcer le reload navigateur
+        res.set({
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        });
+        res.send(currentContent);
+      } catch (error) {
+        console.error('❌ Erreur lecture index.html:', error);
+        res.status(500).json({ error: 'Erreur serveur', details: error.message });
+      }
     });
   } else {
     console.log('❌ Dossier frontend dist non trouvé à:', frontendPath);

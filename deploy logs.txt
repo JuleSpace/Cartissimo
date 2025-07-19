@@ -1,4 +1,4 @@
-Starting Container
+tarting Container
 
 npm warn config production Use `--omit=dev` instead.
 
@@ -84,9 +84,11 @@ npm warn config production Use `--omit=dev` instead.
 
 📄 service-worker.js
 
-✅ index.html trouvé
+✅ index.html trouvé à: /app/frontend/dist/index.html
 
-🔍 Contenu index.html (extrait) :
+🔍 Taille du fichier index.html: 2862 caractères
+
+🔍 Hash du contenu: 7a3ad472
 
 📜 Scripts JS dans index.html: [
 
@@ -97,6 +99,14 @@ npm warn config production Use `--omit=dev` instead.
 ]
 
 🎨 CSS dans index.html: [ '<link href="/css/app.3379de9c.css" rel="stylesheet">' ]
+
+🔍 Comparaison avec les fichiers physiques:
+
+📁 Fichiers JS physiques: [ 'app.48d9a5f7.js', 'chunk-vendors.bb3d06b2.js' ]
+
+🔍 /js/chunk-vendors.3c00c866.js → Existe: ❌
+
+🔍 /js/app.cd81289b.js → Existe: ❌
 
 🔄 Vérification de la connexion à la base de données...
 
@@ -133,7 +143,3 @@ Le serveur écoute sur toutes les interfaces réseau
 🚀 Base de données prête - Application opérationnelle
 
 GET /api/health
-
-GET /service-worker.js
-
-🎯 Express.static serving: /app/frontend/dist/service-worker.js
