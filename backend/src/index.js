@@ -118,10 +118,17 @@ if (process.env.NODE_ENV === 'production') {
     console.log('📁 Structure complète du dossier dist:');
     listDirectory(frontendPath);
     
-    // Vérifier si index.html existe
+    // Vérifier si index.html existe et afficher son contenu
     const indexPath = path.join(frontendPath, 'index.html');
     if (fs.existsSync(indexPath)) {
       console.log('✅ index.html trouvé');
+      const indexContent = fs.readFileSync(indexPath, 'utf8');
+      console.log('🔍 Contenu index.html (extrait) :');
+      // Chercher les liens vers les fichiers JS/CSS
+      const jsMatches = indexContent.match(/<script[^>]*src="[^"]*\.js"[^>]*>/g);
+      const cssMatches = indexContent.match(/<link[^>]*href="[^"]*\.css"[^>]*>/g);
+      console.log('📜 Scripts JS dans index.html:', jsMatches);
+      console.log('🎨 CSS dans index.html:', cssMatches);
     } else {
       console.log('❌ index.html manquant !');
     }
