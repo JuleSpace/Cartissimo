@@ -11,13 +11,14 @@ Entrypoints:
 
 
 
+
  warning  
+
 
 
 webpack performance recommendations: 
 You can limit the size of your bundles by using import() or require.ensure to lazy load some parts of your application.
 For more info visit https://webpack.js.org/guides/code-splitting/
-
 
 
   File                                 Size               Gzipped
@@ -28,7 +29,7 @@ For more info visit https://webpack.js.org/guides/code-splitting/
   dist/css/app.3379de9c.css            50.93 KiB          8.49 KiB
 
   Images and other types of assets omitted.
-  Build at: 2025-07-19T13:45:38.534Z - Hash: f590541094a13277 - Time: 8311ms
+  Build at: 2025-07-19T13:53:51.527Z - Hash: f590541094a13277 - Time: 8422ms
 
 
  DONE  Build complete. The dist directory is ready to be deployed.
@@ -39,15 +40,15 @@ For more info visit https://webpack.js.org/guides/code-splitting/
 ✅ Build terminé
 
 total 212
-drwxr-xr-x 5 root root   4096 Jul 19 13:45 .
-drwxr-xr-x 1 root root   4096 Jul 19 13:45 ..
-drwxr-xr-x 2 root root   4096 Jul 19 13:45 css
--rw-r--r-- 1 root root 178852 Jul 19 13:45 favicon.ico
-drwxr-xr-x 2 root root   4096 Jul 19 13:45 icons
--rw-r--r-- 1 root root   2867 Jul 19 13:45 index.html
-drwxr-xr-x 2 root root   4096 Jul 19 13:45 js
--rw-r--r-- 1 root root    763 Jul 19 13:45 manifest.json
--rw-r--r-- 1 root root   1864 Jul 19 13:45 service-worker.js
+drwxr-xr-x 5 root root   4096 Jul 19 13:53 .
+drwxr-xr-x 1 root root   4096 Jul 19 13:53 ..
+drwxr-xr-x 2 root root   4096 Jul 19 13:53 css
+-rw-r--r-- 1 root root 178852 Jul 19 13:53 favicon.ico
+drwxr-xr-x 2 root root   4096 Jul 19 13:53 icons
+-rw-r--r-- 1 root root   2867 Jul 19 13:53 index.html
+drwxr-xr-x 2 root root   4096 Jul 19 13:53 js
+-rw-r--r-- 1 root root    763 Jul 19 13:53 manifest.json
+-rw-r--r-- 1 root root   1864 Jul 19 13:53 service-worker.js
 
 🔍 Vérification index.html:
 
@@ -63,19 +64,17 @@ drwxr-xr-x 2 root root   4096 Jul 19 13:45 js
         });
       }</script></body></html>
 
-[stage-0  8/10] RUN --mount=type=cache,id=s/5f9a36a0-9dcb-4302-8a5b-28d7b543f264-node_modules/cache,target=/app/node_modules/.cache npm run build  ✔ 21 s
+🔄 Synchronisation forcée...
+
+[stage-0  8/10] RUN --mount=type=cache,id=s/5f9a36a0-9dcb-4302-8a5b-28d7b543f264-node_modules/cache,target=/app/node_modules/.cache npm run build  ✔ 23 s
 
 [stage-0  9/10] RUN printf '\nPATH=/app/node_modules/.bin:$PATH' >> /root/.profile
 
-[stage-0  9/10] RUN printf '\nPATH=/app/node_modules/.bin:$PATH' >> /root/.profile  ✔ 285 ms
+[stage-0  9/10] RUN printf '\nPATH=/app/node_modules/.bin:$PATH' >> /root/.profile  ✔ 256 ms
 
 [stage-0 10/10] COPY . /app
 
-[stage-0 10/10] COPY . /app  ✔ 387 ms
-
-exporting to docker image format
-
-exporting to image
+[stage-0 10/10] COPY . /app  ✔ 406 ms
 
 [auth] sharing credentials for production-europe-west4-drams3a.railway-registry.com
 
@@ -83,15 +82,15 @@ exporting to image
 
 importing to docker
 
-importing to docker  ✔ 19 s
+importing to docker  ✔ 18 s
 
 === Successfully Built! ===
 
 Run:
 
-docker run -it production-europe-west4-drams3a.railway-registry.com/5f9a36a0-9dcb-4302-8a5b-28d7b543f264:d919fff7-d75c-4558-ae2e-fa993396b24d
+docker run -it production-europe-west4-drams3a.railway-registry.com/5f9a36a0-9dcb-4302-8a5b-28d7b543f264:47b2bc24-2ef5-4b44-b4ac-44feea84fa49
 
-Build time: 82.96 seconds
+Build time: 86.44 seconds
 
  
 

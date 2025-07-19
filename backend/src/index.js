@@ -85,11 +85,11 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/ortho', orthoRoutes);
 app.use('/api/theme-completions', themeCompletionRoutes);
 
-// Servir les fichiers statiques
-app.use('/public', express.static(path.join(__dirname, '../public')));
-app.use('/animations', express.static(path.join(__dirname, '../public/animations')));
-app.use('/sounds', express.static(path.join(__dirname, '../public/sounds')));
-app.use('/images', express.static(path.join(__dirname, '../public/images')));
+    // Servir les fichiers statiques du backend
+    app.use('/public', express.static(path.join(__dirname, '../public')));
+    app.use('/animations', express.static(path.join(__dirname, '../public/animations')));
+    app.use('/sounds', express.static(path.join(__dirname, '../public/sounds')));
+    app.use('/images', express.static(path.join(__dirname, '../public/images')));
 
 // Servir le frontend en production
 if (process.env.NODE_ENV === 'production') {
@@ -199,6 +199,9 @@ if (process.env.NODE_ENV === 'production') {
         }
       }
     }));
+    
+    // Routes de compatibilité pour les icônes PWA (Vue.js génère /img/icons/ mais on a /icons/)
+    app.use('/img/icons', express.static(path.join(frontendPath, 'icons')));
     
     // Route catch-all pour les applications SPA - SEULEMENT pour les routes sans extension
     app.get('*', (req, res, next) => {
