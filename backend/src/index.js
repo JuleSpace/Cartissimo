@@ -100,18 +100,44 @@ if (process.env.NODE_ENV === 'production') {
   const fs = require('fs');
   if (fs.existsSync(frontendPath)) {
     console.log('✅ Dossier frontend dist trouvé');
-    app.use(express.static(frontendPath));
     
-    // Route catch-all pour les applications SPA
-    app.get('*', (req, res) => {
-      // Ne pas intercepter les routes API
-      if (req.path.startsWith('/api/') || req.path.startsWith('/public/') || 
-          req.path.startsWith('/animations/') || req.path.startsWith('/sounds/') || 
-          req.path.startsWith('/images/')) {
-        return res.status(404).json({ error: 'API endpoint not found' });
+    // Lister le contenu du dossier dist pour debug
+    const files = fs.readdirSync(frontendPath);
+    console.log('📁 Contenu du dossier dist:', files);
+    
+    // Vérifier si index.html existe
+    const indexPath = path.join(frontendPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      console.log('✅ index.html trouvé');
+    } else {
+      console.log('❌ index.html manquant !');
+    }
+    
+    // Servir les fichiers statiques avec cache
+    app.use(express.static(frontendPath, {
+      maxAge: '1h',
+      etag: false
+    }));
+    
+    // Route catch-all pour les applications SPA - DOIT être à la fin
+    app.get('*', (req, res, next) => {
+      // Ne pas intercepter les routes API et assets
+      if (req.path.startsWith('/api/') || 
+          req.path.startsWith('/public/') || 
+          req.path.startsWith('/animations/') || 
+          req.path.startsWith('/sounds/') || 
+          req.path.startsWith('/images/') ||
+          req.path.includes('.')) { // Fichiers avec extension
+        return next(); // Continuer vers le middleware suivant
       }
       
-      res.sendFile(path.join(frontendPath, 'index.html'));
+      console.log('📄 Serving SPA pour:', req.path);
+      res.sendFile(indexPath, (err) => {
+        if (err) {
+          console.error('❌ Erreur envoi index.html:', err);
+          res.status(500).json({ error: 'Erreur serveur' });
+        }
+      });
     });
   } else {
     console.log('❌ Dossier frontend dist non trouvé à:', frontendPath);
@@ -119,7 +145,8 @@ if (process.env.NODE_ENV === 'production') {
       res.json({ 
         message: 'Cartissimo API est en cours d\'exécution', 
         status: 'API active',
-        note: 'Frontend non disponible - dossier dist manquant'
+        note: 'Frontend non disponible - dossier dist manquant',
+        path: frontendPath
       });
     });
   }
