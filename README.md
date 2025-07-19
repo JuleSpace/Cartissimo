@@ -93,3 +93,7 @@ Mot de passe : Parent123!
 Parent 2:
 Email : parent2@cartissimo.com
 Mot de passe : Parent123!
+
+Parent 3:
+Email : parent3@cartissimo.com
+Mot de passe : Parent123!
