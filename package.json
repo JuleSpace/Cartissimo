@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Application d'aide aux enfants malentendants avec animations et sons",
   "scripts": {
-    "build": "echo '🔄 Installation backend...' && cd backend && npm install && echo '🔄 Installation frontend...' && cd ../frontend && rm -rf dist node_modules && npm ci && echo '🔄 Build frontend...' && npm run build && echo '✅ Build terminé' && ls -la dist/ && echo '🔍 Vérification index.html:' && head -20 dist/index.html",
+    "build": "echo '🔄 Installation backend...' && cd backend && npm install && echo '🔄 Installation frontend...' && cd ../frontend && rm -rf dist node_modules && npm ci && echo '🔄 Build frontend...' && npm run build && echo '✅ Build terminé' && ls -la dist/ && echo '🔍 Vérification index.html:' && head -20 dist/index.html && echo '🔄 Synchronisation forcée...' && sleep 2 && touch dist/index.html",
     "start": "cd backend && npm start",
     "postinstall": "npm run build",
     "dev:backend": "cd backend && npm run dev",

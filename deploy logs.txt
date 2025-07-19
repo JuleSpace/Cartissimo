@@ -1,9 +1,3 @@
-Starting Container
-
-npm warn config production Use `--omit=dev` instead.
-
- 
-
 > cartissimo@1.0.0 start
 
 > cd backend && npm start
@@ -42,6 +36,8 @@ npm warn config production Use `--omit=dev` instead.
 
 ✅ Dossier frontend dist trouvé
 
+📄   icon-128x128.png
+
 📁 Structure complète du dossier dist:
 
 📁 css/
@@ -51,8 +47,6 @@ npm warn config production Use `--omit=dev` instead.
 📄 favicon.ico
 
 📁 icons/
-
-📄   icon-128x128.png
 
 📄   icon-144x144.png
 
@@ -83,6 +77,22 @@ npm warn config production Use `--omit=dev` instead.
 📄 manifest.json
 
 📄 service-worker.js
+
+🔍 Recherche de tous les index.html dans le container:
+
+📄 Trouvé index.html: /app/frontend/dist/index.html
+
+   Hash: 7a3ad472, Scripts: 2
+
+   JS files: ["<script defer=\"defer\" src=\"/js/chunk-vendors.3c00c866.js\">","<script defer=\"defer\" src=\"/js/app.cd81289b.js\">"]
+
+📄 Trouvé index.html: /app/frontend/public/index.html
+
+   Hash: 58a65346, Scripts: 0
+
+📄 Trouvé index.html: /app/frontend/node_modules/@vue/cli-service/generator/template/public/index.html
+
+   Hash: 51b6e777, Scripts: 0
 
 ✅ index.html trouvé à: /app/frontend/dist/index.html
 
@@ -133,3 +143,13 @@ Le serveur écoute sur toutes les interfaces réseau
 ✅ Connexion à la base de données réussie
 
 🔄 Synchronisation des modèles...
+
+✅ Modèles synchronisés
+
+📊 Nombre d'utilisateurs existants: 6
+
+✅ Base de données déjà initialisée
+
+🚀 Base de données prête - Application opérationnelle
+
+GET /api/health

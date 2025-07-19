@@ -290,8 +290,13 @@ const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
 
 app.listen(PORT, HOST, () => {
-  console.log(`Serveur démarré sur le port ${PORT}`);
-  console.log(`Accessible sur http://localhost:${PORT}`);
-  console.log(`Et sur http://${IP}:${PORT}`);
-  console.log('Le serveur écoute sur toutes les interfaces réseau');
+  console.log(`🚀 Serveur démarré sur le port ${PORT}`);
+  console.log(`🌐 Accessible sur http://0.0.0.0:${PORT} (toutes interfaces)`);
+  if (process.env.NODE_ENV === 'production') {
+    console.log(`🌍 URL publique Railway détectée automatiquement`);
+  } else {
+    console.log(`🏠 Développement: http://localhost:${PORT}`);
+    console.log(`🏠 Réseau local: http://${IP}:${PORT}`);
+  }
+  console.log('✅ Le serveur écoute sur toutes les interfaces réseau');
 });
