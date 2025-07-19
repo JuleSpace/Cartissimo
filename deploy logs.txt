@@ -1,0 +1,139 @@
+Starting Container
+
+npm warn config production Use `--omit=dev` instead.
+
+ 
+
+> cartissimo@1.0.0 start
+
+> cd backend && npm start
+
+ 
+
+npm warn config production Use `--omit=dev` instead.
+
+ 
+
+> app-handicap-backend@1.0.0 start
+
+> node src/index.js
+
+ 
+
+🔧 Utilisation de DATABASE_URL pour la connexion
+
+🔧 CORS origins configurées: [
+
+  'http://localhost:8080';,
+
+  'http://localhost:8080';,
+
+  'https://cartissimo.up.railway.app';,
+
+  'http://cartissimo.up.railway.app';,
+
+  /railway\.app$/,
+
+  /railway\.run$/
+
+]
+
+🎨 Chemin frontend: /app/frontend/dist
+
+✅ Dossier frontend dist trouvé
+
+📁 Structure complète du dossier dist:
+
+📁 css/
+
+📄   app.3379de9c.css
+
+📄 favicon.ico
+
+📁 icons/
+
+📄   icon-128x128.png
+
+📄   icon-144x144.png
+
+📄   icon-152x152.png
+
+📄   icon-192x192.png
+
+📄   icon-384x384.png
+
+📄   icon-512x512.png
+
+📄   icon-72x72.png
+
+📄   icon-96x96.png
+
+📄 index.html
+
+📁 js/
+
+📄   app.48d9a5f7.js
+
+📄   app.48d9a5f7.js.map
+
+📄   chunk-vendors.bb3d06b2.js
+
+📄   chunk-vendors.bb3d06b2.js.map
+
+📄 manifest.json
+
+📄 service-worker.js
+
+✅ index.html trouvé
+
+🔍 Contenu index.html (extrait) :
+
+📜 Scripts JS dans index.html: [
+
+  '<script defer="defer" src="/js/chunk-vendors.3c00c866.js">',
+
+  '<script defer="defer" src="/js/app.cd81289b.js">'
+
+]
+
+🎨 CSS dans index.html: [ '<link href="/css/app.3379de9c.css" rel="stylesheet">' ]
+
+🔄 Vérification de la connexion à la base de données...
+
+🔧 Configuration DB: {
+
+  host: 'gondola.proxy.rlwy.net',
+
+  database: 'railway',
+
+  user: 'root',
+
+  passwordSet: true
+
+}
+
+Serveur démarré sur le port 8080
+
+Accessible sur http://localhost:8080
+
+Et sur http://localhost:8080
+
+Le serveur écoute sur toutes les interfaces réseau
+
+✅ Connexion à la base de données réussie
+
+🔄 Synchronisation des modèles...
+
+✅ Modèles synchronisés
+
+📊 Nombre d'utilisateurs existants: 6
+
+✅ Base de données déjà initialisée
+
+🚀 Base de données prête - Application opérationnelle
+
+GET /api/health
+
+GET /service-worker.js
+
+🎯 Express.static serving: /app/frontend/dist/service-worker.js

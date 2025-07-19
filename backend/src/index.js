@@ -121,14 +121,38 @@ if (process.env.NODE_ENV === 'production') {
     // Vérifier si index.html existe et afficher son contenu
     const indexPath = path.join(frontendPath, 'index.html');
     if (fs.existsSync(indexPath)) {
-      console.log('✅ index.html trouvé');
+      console.log('✅ index.html trouvé à:', indexPath);
+      
+      // Forcer la lecture fraîche du fichier (éviter le cache Node)
+      delete require.cache[indexPath];
       const indexContent = fs.readFileSync(indexPath, 'utf8');
-      console.log('🔍 Contenu index.html (extrait) :');
+      
+      console.log('🔍 Taille du fichier index.html:', indexContent.length, 'caractères');
+      console.log('🔍 Hash du contenu:', require('crypto').createHash('md5').update(indexContent).digest('hex').substring(0, 8));
+      
       // Chercher les liens vers les fichiers JS/CSS
       const jsMatches = indexContent.match(/<script[^>]*src="[^"]*\.js"[^>]*>/g);
       const cssMatches = indexContent.match(/<link[^>]*href="[^"]*\.css"[^>]*>/g);
       console.log('📜 Scripts JS dans index.html:', jsMatches);
       console.log('🎨 CSS dans index.html:', cssMatches);
+      
+      // Comparer avec les fichiers physiques
+      console.log('🔍 Comparaison avec les fichiers physiques:');
+      const jsDir = path.join(frontendPath, 'js');
+      if (fs.existsSync(jsDir)) {
+        const jsFiles = fs.readdirSync(jsDir).filter(f => f.endsWith('.js') && !f.endsWith('.map'));
+        console.log('📁 Fichiers JS physiques:', jsFiles);
+        
+        // Vérifier si les fichiers JS du HTML existent
+        jsMatches?.forEach(match => {
+          const srcMatch = match.match(/src="([^"]+)"/);
+          if (srcMatch) {
+            const jsFile = srcMatch[1];
+            const physicalPath = path.join(frontendPath, jsFile.replace(/^\//, ''));
+            console.log(`🔍 ${jsFile} → Existe: ${fs.existsSync(physicalPath) ? '✅' : '❌'}`);
+          }
+        });
+      }
     } else {
       console.log('❌ index.html manquant !');
     }
@@ -138,8 +162,17 @@ if (process.env.NODE_ENV === 'production') {
       maxAge: '1h',
       etag: false,
       index: false,  // Important : ne pas servir index.html automatiquement
-      setHeaders: (res, path) => {
-        console.log('🎯 Express.static serving:', path);
+      setHeaders: (res, filepath, stat) => {
+        console.log('🎯 Express.static serving:', filepath);
+        
+        // Forcer le reload des fichiers critiques (pas de cache)
+        if (filepath.includes('index.html') || filepath.includes('.js') || filepath.includes('.css')) {
+          res.set({
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          });
+        }
       }
     }));
     
