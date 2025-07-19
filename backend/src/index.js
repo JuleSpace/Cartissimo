@@ -25,8 +25,10 @@ const app = express();
 // Middleware
 const allowedOrigins = [
   'http://localhost:8080',
-  frontendOrigin
-];
+  frontendOrigin,
+  process.env.RAILWAY_STATIC_URL,
+  'https://' + process.env.RAILWAY_STATIC_URL
+].filter(Boolean);
 
 app.use(cors({
   origin: allowedOrigins,
@@ -51,6 +53,16 @@ app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Endpoint de santé pour Railway
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'Cartissimo API is running',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
