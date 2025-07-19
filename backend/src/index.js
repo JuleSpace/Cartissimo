@@ -102,8 +102,21 @@ if (process.env.NODE_ENV === 'production') {
     console.log('✅ Dossier frontend dist trouvé');
     
     // Lister le contenu du dossier dist pour debug
-    const files = fs.readdirSync(frontendPath);
-    console.log('📁 Contenu du dossier dist:', files);
+    const listDirectory = (dir, prefix = '') => {
+      const items = fs.readdirSync(dir);
+      items.forEach(item => {
+        const itemPath = path.join(dir, item);
+        if (fs.statSync(itemPath).isDirectory()) {
+          console.log(`📁 ${prefix}${item}/`);
+          listDirectory(itemPath, prefix + '  ');
+        } else {
+          console.log(`📄 ${prefix}${item}`);
+        }
+      });
+    };
+    
+    console.log('📁 Structure complète du dossier dist:');
+    listDirectory(frontendPath);
     
     // Vérifier si index.html existe
     const indexPath = path.join(frontendPath, 'index.html');
@@ -117,7 +130,10 @@ if (process.env.NODE_ENV === 'production') {
     app.use(express.static(frontendPath, {
       maxAge: '1h',
       etag: false,
-      index: false  // Important : ne pas servir index.html automatiquement
+      index: false,  // Important : ne pas servir index.html automatiquement
+      setHeaders: (res, path) => {
+        console.log('🎯 Express.static serving:', path);
+      }
     }));
     
     // Route catch-all pour les applications SPA - SEULEMENT pour les routes sans extension
@@ -134,8 +150,17 @@ if (process.env.NODE_ENV === 'production') {
       // Laisser passer tous les fichiers avec extension (js, css, png, etc.)
       const hasFileExtension = /\.[a-zA-Z0-9]+$/.test(req.path);
       if (hasFileExtension) {
-        console.log('📎 Fichier statique:', req.path);
-        return res.status(404).send('File not found'); // Si le fichier n'existe pas
+        console.log('📎 Fichier statique demandé:', req.path);
+        
+        // Vérifier si le fichier existe physiquement
+        const filePath = path.join(frontendPath, req.path);
+        if (fs.existsSync(filePath)) {
+          console.log('✅ Fichier existe:', filePath);
+          return next(); // Laisser express.static le gérer
+        } else {
+          console.log('❌ Fichier n\'existe pas:', filePath);
+          return res.status(404).send('File not found');
+        }
       }
       
       // Seulement pour les routes SPA (sans extension)
