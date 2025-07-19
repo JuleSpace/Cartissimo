@@ -1370,11 +1370,25 @@ const seedDatabase = async () => {
     console.log('Emma Dubois (parent2@cartissimo.com)');
     console.log('Thomas Bernard (parent3@cartissimo.com)');
 
-    process.exit(0);
+    return true; // Succès
   } catch (error) {
     console.error('Erreur lors de l\'initialisation de la base de données:', error);
-    process.exit(1);
+    throw error; // Relancer l'erreur pour la gestion par l'appelant
   }
 };
 
-seedDatabase();
+// Si le fichier est exécuté directement
+if (require.main === module) {
+  seedDatabase()
+    .then(() => {
+      console.log('✅ Seed terminé avec succès');
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('❌ Erreur lors du seed:', error);
+      process.exit(1);
+    });
+}
+
+// Exporter la fonction pour usage comme module
+module.exports = seedDatabase;

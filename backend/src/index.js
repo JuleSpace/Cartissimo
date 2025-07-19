@@ -22,13 +22,25 @@ const frontendOrigin = `http://${IP}:8080`;
 
 const app = express();
 
-// Middleware
-const allowedOrigins = [
+// Middleware CORS - Configuration étendue pour Railway
+let allowedOrigins = [
   'http://localhost:8080',
-  frontendOrigin,
-  process.env.RAILWAY_STATIC_URL,
-  'https://' + process.env.RAILWAY_STATIC_URL
-].filter(Boolean);
+  frontendOrigin
+];
+
+// Ajouter les domaines Railway si disponibles
+if (process.env.RAILWAY_STATIC_URL) {
+  allowedOrigins.push(`https://${process.env.RAILWAY_STATIC_URL}`);
+  allowedOrigins.push(`http://${process.env.RAILWAY_STATIC_URL}`);
+}
+
+// En production, permettre toutes les origines du même domaine
+if (process.env.NODE_ENV === 'production') {
+  allowedOrigins.push(/railway\.app$/);
+  allowedOrigins.push(/railway\.run$/);
+}
+
+console.log('🔧 CORS origins configurées:', allowedOrigins);
 
 app.use(cors({
   origin: allowedOrigins,
@@ -81,20 +93,59 @@ app.use('/images', express.static(path.join(__dirname, '../public/images')));
 
 // Servir le frontend en production
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+  const frontendPath = path.join(__dirname, '../../frontend/dist');
+  console.log('🎨 Chemin frontend:', frontendPath);
   
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
+  // Vérifier si le dossier dist existe
+  const fs = require('fs');
+  if (fs.existsSync(frontendPath)) {
+    console.log('✅ Dossier frontend dist trouvé');
+    app.use(express.static(frontendPath));
+    
+    // Route catch-all pour les applications SPA
+    app.get('*', (req, res) => {
+      // Ne pas intercepter les routes API
+      if (req.path.startsWith('/api/') || req.path.startsWith('/public/') || 
+          req.path.startsWith('/animations/') || req.path.startsWith('/sounds/') || 
+          req.path.startsWith('/images/')) {
+        return res.status(404).json({ error: 'API endpoint not found' });
+      }
+      
+      res.sendFile(path.join(frontendPath, 'index.html'));
+    });
+  } else {
+    console.log('❌ Dossier frontend dist non trouvé à:', frontendPath);
+    app.get('/', (req, res) => {
+      res.json({ 
+        message: 'Cartissimo API est en cours d\'exécution', 
+        status: 'API active',
+        note: 'Frontend non disponible - dossier dist manquant'
+      });
+    });
+  }
+} else {
+  // En développement, juste une route de base
+  app.get('/', (req, res) => {
+    res.json({ 
+      message: 'Cartissimo API - Mode développement',
+      health: '/api/health',
+      frontend: 'http://localhost:8080'
+    });
   });
 }
 
-// Synchronisation de la base de données
-sequelize.sync()
+// Initialisation de la base de données avec l'utilitaire dédié
+const { initializeDatabase } = require('./utils/dbInit');
+
+// Démarrer l'initialisation
+initializeDatabase()
   .then(() => {
-    console.log('Base de données synchronisée');
+    console.log('🚀 Base de données prête - Application opérationnelle');
   })
-  .catch((err) => {
-    console.error('Erreur de synchronisation de la base de données:', err);
+  .catch((error) => {
+    console.error('💥 Échec de l\'initialisation de la base de données:', error.message);
+    console.error('🛑 L\'application peut ne pas fonctionner correctement');
+    // Ne pas arrêter l'application pour permettre le diagnostic
   });
 
 const PORT = process.env.PORT || 3000;

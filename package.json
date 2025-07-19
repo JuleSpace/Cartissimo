@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "Application d'aide aux enfants malentendants avec animations et sons",
   "scripts": {
-    "build": "cd frontend && npm install && npm run build",
-    "start": "cd backend && npm install && npm start",
+    "build": "echo '🔄 Installation backend...' && cd backend && npm install && echo '🔄 Installation frontend...' && cd ../frontend && npm install && echo '🔄 Build frontend...' && npm run build && echo '✅ Build terminé'",
+    "start": "cd backend && npm start",
+    "postinstall": "npm run build",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run serve"
   },

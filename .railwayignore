@@ -1,0 +1,35 @@
+# Fichiers de développement
+*.log
+*.tmp
+.cache
+.DS_Store
+.vscode/
+.idea/
+
+# Dépendances (seront réinstallées)
+node_modules/
+*/node_modules/
+
+# Fichiers de build locaux
+frontend/dist/
+backend/logs/
+
+# Variables d'environnement locales
+.env
+.env.local
+.env.development
+.env.production
+
+# Fichiers de test
+*.test.js
+*.spec.js
+coverage/
+
+# Documentation de développement
+docs/
+*.md
+!README.md
+
+# Git
+.git/
+.gitignore 
