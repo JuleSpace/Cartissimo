@@ -94,10 +94,19 @@ export default {
         commit('SET_LOADING', true);
         commit('SET_ERROR', null);
         
+        // Configurer les headers selon le type de données
+        const headers = {
+          Authorization: `Bearer ${rootState.auth.token}`
+        };
+        
+        // Si c'est du FormData (avec image), ne pas définir Content-Type
+        // pour laisser axios le faire automatiquement
+        if (!(themeData instanceof FormData)) {
+          headers['Content-Type'] = 'application/json';
+        }
+        
         const response = await axios.post(`${API_URL}/themes`, themeData, {
-          headers: {
-            Authorization: `Bearer ${rootState.auth.token}`
-          }
+          headers
         });
         
         commit('SET_THEMES', [...state.themes, response.data]);

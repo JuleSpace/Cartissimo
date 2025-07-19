@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const themeController = require('../controllers/themeController');
+const { controller: themeController, upload } = require('../controllers/themeController');
 const { auth } = require('../middleware/auth');
 const checkSubscription = require('../middleware/subscription');
 const { controller: animationController } = require('../controllers/animationController');
 
 router.use(auth);
 
-router.post('/', themeController.create);
+router.post('/', upload, themeController.create);
 router.get('/', checkSubscription, themeController.getAllThemes);
 router.get('/:id', checkSubscription, themeController.getOne);
 router.put('/:id', themeController.update);

@@ -27,6 +27,28 @@
         ></textarea>
       </div>
 
+      <div class="form-group">
+        <label for="themeImage">Image du thème</label>
+        <div class="file-upload-area">
+          <input 
+            id="themeImage" 
+            type="file" 
+            accept="image/*"
+            @change="handleImageUpload"
+            ref="imageInput"
+          >
+          <div v-if="imagePreview" class="image-preview">
+            <img :src="imagePreview" alt="Aperçu" class="preview-img">
+            <button type="button" @click="removeImage" class="remove-image">×</button>
+          </div>
+          <div v-else class="upload-placeholder">
+            <i class="fas fa-image"></i>
+            <p>Cliquez pour ajouter une image de thème<br>
+            <small>(JPG, PNG, GIF - Max 5MB)</small></p>
+          </div>
+        </div>
+      </div>
+
       <div class="animations-section">
         <h2>Animations</h2>
         <p class="info-text">Ajoutez jusqu'à 10 animations pour cette série.</p>
@@ -73,10 +95,13 @@ export default {
     const router = useRouter();
     const theme = ref({
       name: '',
-      description: ''
+      description: '',
+      image: null
     });
     const animations = ref([]);
     const error = ref('');
+    const imagePreview = ref('');
+    const imageInput = ref(null);
 
     const goBack = () => {
       router.push('/themes');
@@ -96,10 +121,63 @@ export default {
       }
     };
 
+    const handleImageUpload = (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        // Vérifier la taille (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          error.value = 'L\'image ne peut pas dépasser 5MB';
+          return;
+        }
+        
+        // Vérifier le type
+        if (!file.type.startsWith('image/')) {
+          error.value = 'Seuls les fichiers image sont acceptés';
+          return;
+        }
+
+        theme.value.image = file;
+        
+        // Créer un aperçu
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          imagePreview.value = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        
+        error.value = '';
+      }
+    };
+
+    const removeImage = () => {
+      theme.value.image = null;
+      imagePreview.value = '';
+      if (imageInput.value) {
+        imageInput.value.value = '';
+      }
+    };
+
     const createTheme = async () => {
       try {
+        // Préparer les données avec l'image si nécessaire
+        let themeData;
+        
+        if (theme.value.image) {
+          // Si il y a une image, utiliser FormData
+          themeData = new FormData();
+          themeData.append('name', theme.value.name);
+          themeData.append('description', theme.value.description);
+          themeData.append('image', theme.value.image);
+        } else {
+          // Si pas d'image, envoyer les données normalement
+          themeData = {
+            name: theme.value.name,
+            description: theme.value.description
+          };
+        }
+        
         // Créer d'abord le thème
-        const createdTheme = await store.dispatch('themes/createTheme', theme.value);
+        const createdTheme = await store.dispatch('themes/createTheme', themeData);
         
         if (!createdTheme || !createdTheme.id) {
           throw new Error('Erreur lors de la création du thème : ID manquant');
@@ -154,9 +232,13 @@ export default {
       theme,
       animations,
       error,
+      imagePreview,
+      imageInput,
       createTheme,
       goBack,
-      addAnimation
+      addAnimation,
+      handleImageUpload,
+      removeImage
     };
   }
 };
@@ -239,6 +321,80 @@ input, textarea, select {
 .btn-secondary:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+}
+
+/* Styles pour l'upload d'image */
+.file-upload-area {
+  position: relative;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  transition: border-color 0.3s;
+}
+
+.file-upload-area:hover {
+  border-color: #4B95DE;
+}
+
+.file-upload-area input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.upload-placeholder {
+  color: #666;
+  pointer-events: none;
+}
+
+.upload-placeholder i {
+  font-size: 2rem;
+  color: #ddd;
+  margin-bottom: 10px;
+}
+
+.upload-placeholder small {
+  color: #999;
+}
+
+.image-preview {
+  position: relative;
+  display: inline-block;
+  max-width: 300px;
+}
+
+.preview-img {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.remove-image {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ff4757;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-image:hover {
+  background: #ff3838;
 }
 
 .error-message {

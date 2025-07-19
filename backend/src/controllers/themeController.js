@@ -1,7 +1,45 @@
 const { Theme, Animation, User, UserTheme, Patient, PatientTherapist, Orthophoniste } = require('../models');
 const { Op } = require('sequelize');
 const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 const db = require('../models');
+
+// Configuration Multer pour l'upload des images de thèmes
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, '../../public/images/themes');
+    
+    // Créer le répertoire s'il n'existe pas
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    // Générer un nom de fichier unique
+    const uniqueName = `theme_${Date.now()}_${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
+    cb(null, uniqueName);
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  // Accepter seulement les images
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Seuls les fichiers image sont acceptés'), false);
+  }
+};
+
+const upload = multer({ 
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // Limite de 5MB
+  }
+});
 
 const themeController = {
   // Créer un nouveau thème
@@ -12,10 +50,18 @@ const themeController = {
       console.log('User:', req.user);
       
       const { name, description } = req.body;
+      
+      // Gérer l'image uploadée
+      let imagePath = null;
+      if (req.file) {
+        // Stocker le chemin relatif pour la base de données
+        imagePath = `/images/themes/${req.file.filename}`;
+      }
+      
       const theme = await Theme.create({
         name,
         description,
-        image,
+        image: imagePath,
         status: 'pending',
         createdBy: req.user.id
       });
@@ -787,4 +833,7 @@ const themeController = {
   }
 };
 
-module.exports = themeController; 
+module.exports = {
+  controller: themeController,
+  upload: upload.single('image')
+}; 
