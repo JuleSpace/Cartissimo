@@ -16,9 +16,17 @@ const paymentController = {
         return res.status(404).json({ error: 'Aucun patient trouvé pour cet utilisateur' });
       }
 
-      // Construire l'URL frontend dynamiquement
-      const IP = process.env.IP || 'localhost';
-      const FRONTEND_URL = `http://${IP}:8080`;
+      // Construire l'URL frontend dynamiquement selon l'environnement
+      let FRONTEND_URL;
+      if (process.env.NODE_ENV === 'production') {
+        // En production Railway, utiliser l'URL publique
+        const baseUrl = req.get('host') ? `https://${req.get('host')}` : 'https://cartissimo.up.railway.app';
+        FRONTEND_URL = baseUrl;
+      } else {
+        // En développement, utiliser localhost
+        const IP = process.env.IP || 'localhost';
+        FRONTEND_URL = `http://${IP}:8080`;
+      }
       
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],

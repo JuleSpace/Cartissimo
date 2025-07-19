@@ -1,120 +1,6 @@
-📄   icon-72x72.png
+Starting Container
 
-📄   icon-96x96.png
-
-📄 index.html
-
-📁 js/
-
-📄   app.48d9a5f7.js
-
-📄   app.48d9a5f7.js.map
-
-📄   chunk-vendors.bb3d06b2.js
-
-📄   chunk-vendors.bb3d06b2.js.map
-
-📄 manifest.json
-
-📄 service-worker.js
-
-🔍 Recherche de tous les index.html dans le container:
-
-📄 Trouvé index.html: /app/frontend/dist/index.html
-
-   Hash: 7a3ad472, Scripts: 2
-
-   JS files: ["<script defer=\"defer\" src=\"/js/chunk-vendors.3c00c866.js\">","<script defer=\"defer\" src=\"/js/app.cd81289b.js\">"]
-
-📄 Trouvé index.html: /app/frontend/public/index.html
-
-   Hash: 58a65346, Scripts: 0
-
-📄 Trouvé index.html: /app/frontend/node_modules/@vue/cli-service/generator/template/public/index.html
-
-   Hash: 51b6e777, Scripts: 0
-
-✅ index.html trouvé à: /app/frontend/dist/index.html
-
-🔍 Taille du fichier index.html: 2862 caractères
-
-🔍 Hash du contenu: 7a3ad472
-
-📜 Scripts JS dans index.html: [
-
-  '<script defer="defer" src="/js/chunk-vendors.3c00c866.js">',
-
-  '<script defer="defer" src="/js/app.cd81289b.js">'
-
-]
-
-🎨 CSS dans index.html: [ '<link href="/css/app.3379de9c.css" rel="stylesheet">' ]
-
-🔍 Comparaison avec les fichiers physiques:
-
-📁 Fichiers JS physiques: [ 'app.48d9a5f7.js', 'chunk-vendors.bb3d06b2.js' ]
-
-🔍 /js/chunk-vendors.3c00c866.js → Existe: ❌
-
-🔍 /js/app.cd81289b.js → Existe: ❌
-
-🔄 Vérification de la connexion à la base de données...
-
-🔧 Configuration DB: {
-
-  host: 'gondola.proxy.rlwy.net',
-
-  database: 'railway',
-
-  user: 'root',
-
-  passwordSet: true
-
-}
-
-🚀 Serveur démarré sur le port 8080
-
-🌐 Accessible sur http://0.0.0.0:8080 (toutes interfaces)
-
-🌍 URL publique Railway détectée automatiquement
-
-✅ Le serveur écoute sur toutes les interfaces réseau
-
-✅ Connexion à la base de données réussie
-
-🔄 Synchronisation des modèles...
-
-GET /api/health
-
-✅ Modèles synchronisés
-
-📊 Nombre d'utilisateurs existants: 6
-
-✅ Base de données déjà initialisée
-
-🚀 Base de données prête - Application opérationnelle
-
-npm warn config production Use `--omit=dev` instead.
-
- 
-
-> cartissimo@1.0.0 start
-
-> cd backend && npm start
-
- 
-
-npm warn config production Use `--omit=dev` instead.
-
- 
-
-> app-handicap-backend@1.0.0 start
-
-> node src/index.js
-
- 
-
-🔧 Utilisation de DATABASE_URL pour la connexion
+🔧 Utilisation des variables DB individuelles
 
 🔧 CORS origins configurées: [
 
@@ -124,32 +10,40 @@ npm warn config production Use `--omit=dev` instead.
 
   'https://cartissimo.up.railway.app';,
 
-  'http://cartissimo.up.railway.app';,
-
-  /railway\.app$/,
-
-  /railway\.run$/
+  'http://cartissimo.up.railway.app';
 
 ]
 
-🎨 Chemin frontend: /app/frontend/dist
+🔄 Vérification de la connexion à la base de données...
 
-✅ Dossier frontend dist trouvé
+🔧 Configuration DB: {
 
-📁 Structure complète du dossier dist:
+  host: 'non défini',
 
-📁 css/
+  database: 'non défini',
 
-📄   app.3379de9c.css
+  user: 'non défini',
 
-📄 favicon.ico
+  passwordSet: false
 
-📁 icons/
+}
 
-📄   icon-128x128.png
+🚀 Serveur démarré sur le port 8080
 
-📄   icon-144x144.png
+🌐 Accessible sur http://0.0.0.0:8080 (toutes interfaces)
 
-📄   icon-152x152.png
+🏠 Développement: http://localhost:8080
 
-📄   icon-192x192.png
+🏠 Réseau local: http://localhost:8080
+
+✅ Le serveur écoute sur toutes les interfaces réseau
+
+❌ Erreur de connexion à la base de données:
+
+Message: connect ECONNREFUSED ::1:3306
+
+💥 Échec de l'initialisation de la base de données: Impossible de se connecter à la base de données
+
+🛑 L'application peut ne pas fonctionner correctement
+
+GET /api/health
