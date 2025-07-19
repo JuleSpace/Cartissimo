@@ -1,4 +1,4 @@
-tarting Container
+Starting Container
 
 npm warn config production Use `--omit=dev` instead.
 
@@ -133,13 +133,3 @@ Le serveur écoute sur toutes les interfaces réseau
 ✅ Connexion à la base de données réussie
 
 🔄 Synchronisation des modèles...
-
-✅ Modèles synchronisés
-
-📊 Nombre d'utilisateurs existants: 6
-
-✅ Base de données déjà initialisée
-
-🚀 Base de données prête - Application opérationnelle
-
-GET /api/health

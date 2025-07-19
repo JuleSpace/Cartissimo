@@ -91,10 +91,15 @@ app.use('/animations', express.static(path.join(__dirname, '../public/animations
 app.use('/sounds', express.static(path.join(__dirname, '../public/sounds')));
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
 
-// Servir le frontend en production
-if (process.env.NODE_ENV === 'production') {
-  const frontendPath = path.join(__dirname, '../../frontend/dist');
-  console.log('🎨 Chemin frontend:', frontendPath);
+// Servir le frontend en production  
+const setupFrontend = async () => {
+  if (process.env.NODE_ENV === 'production') {
+    const frontendPath = path.join(__dirname, '../../frontend/dist');
+    console.log('🎨 Chemin frontend:', frontendPath);
+    
+    // ATTENDRE que le build soit vraiment terminé
+    console.log('⏳ Attente de 3 secondes pour s\'assurer que le build est terminé...');
+    await new Promise(resolve => setTimeout(resolve, 3000));
   
   // Vérifier si le dossier dist existe
   const fs = require('fs');
@@ -117,6 +122,30 @@ if (process.env.NODE_ENV === 'production') {
     
     console.log('📁 Structure complète du dossier dist:');
     listDirectory(frontendPath);
+    
+    // Debug : Chercher TOUS les fichiers index.html dans le container
+    console.log('🔍 Recherche de tous les index.html dans le container:');
+    const { execSync } = require('child_process');
+    try {
+      const result = execSync('find /app -name "index.html" -type f', { encoding: 'utf8' });
+      const indexFiles = result.trim().split('\n').filter(f => f);
+      indexFiles.forEach(file => {
+        console.log(`📄 Trouvé index.html: ${file}`);
+        try {
+          const content = fs.readFileSync(file, 'utf8');
+          const hash = require('crypto').createHash('md5').update(content).digest('hex').substring(0, 8);
+          const jsMatches = content.match(/<script[^>]*src="[^"]*\.js"[^>]*>/g);
+          console.log(`   Hash: ${hash}, Scripts: ${jsMatches?.length || 0}`);
+          if (jsMatches) {
+            console.log(`   JS files: ${JSON.stringify(jsMatches)}`);
+          }
+        } catch (e) {
+          console.log(`   Erreur lecture: ${e.message}`);
+        }
+      });
+    } catch (e) {
+      console.log('❌ Erreur recherche find:', e.message);
+    }
     
     // Vérifier si index.html existe et afficher son contenu
     const indexPath = path.join(frontendPath, 'index.html');
@@ -227,26 +256,19 @@ if (process.env.NODE_ENV === 'production') {
       }
     });
   } else {
-    console.log('❌ Dossier frontend dist non trouvé à:', frontendPath);
+    // En développement, juste une route de base
     app.get('/', (req, res) => {
       res.json({ 
-        message: 'Cartissimo API est en cours d\'exécution', 
-        status: 'API active',
-        note: 'Frontend non disponible - dossier dist manquant',
-        path: frontendPath
+        message: 'Cartissimo API - Mode développement',
+        health: '/api/health',
+        frontend: 'http://localhost:8080'
       });
     });
   }
-} else {
-  // En développement, juste une route de base
-  app.get('/', (req, res) => {
-    res.json({ 
-      message: 'Cartissimo API - Mode développement',
-      health: '/api/health',
-      frontend: 'http://localhost:8080'
-    });
-  });
-}
+};
+
+// Appeler la configuration frontend
+setupFrontend().catch(err => console.error('❌ Erreur setup frontend:', err));
 
 // Initialisation de la base de données avec l'utilitaire dédié
 const { initializeDatabase } = require('./utils/dbInit');
