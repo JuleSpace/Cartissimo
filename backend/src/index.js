@@ -91,15 +91,10 @@ app.use('/animations', express.static(path.join(__dirname, '../public/animations
 app.use('/sounds', express.static(path.join(__dirname, '../public/sounds')));
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
 
-// Servir le frontend en production  
-const setupFrontend = async () => {
-  if (process.env.NODE_ENV === 'production') {
-    const frontendPath = path.join(__dirname, '../../frontend/dist');
-    console.log('🎨 Chemin frontend:', frontendPath);
-    
-    // ATTENDRE que le build soit vraiment terminé
-    console.log('⏳ Attente de 3 secondes pour s\'assurer que le build est terminé...');
-    await new Promise(resolve => setTimeout(resolve, 3000));
+// Servir le frontend en production
+if (process.env.NODE_ENV === 'production') {
+  const frontendPath = path.join(__dirname, '../../frontend/dist');
+  console.log('🎨 Chemin frontend:', frontendPath);
   
   // Vérifier si le dossier dist existe
   const fs = require('fs');
@@ -256,19 +251,26 @@ const setupFrontend = async () => {
       }
     });
   } else {
-    // En développement, juste une route de base
+    console.log('❌ Dossier frontend dist non trouvé à:', frontendPath);
     app.get('/', (req, res) => {
       res.json({ 
-        message: 'Cartissimo API - Mode développement',
-        health: '/api/health',
-        frontend: 'http://localhost:8080'
+        message: 'Cartissimo API est en cours d\'exécution', 
+        status: 'API active',
+        note: 'Frontend non disponible - dossier dist manquant',
+        path: frontendPath
       });
     });
   }
-};
-
-// Appeler la configuration frontend
-setupFrontend().catch(err => console.error('❌ Erreur setup frontend:', err));
+} else {
+  // En développement, juste une route de base
+  app.get('/', (req, res) => {
+    res.json({ 
+      message: 'Cartissimo API - Mode développement',
+      health: '/api/health',
+      frontend: 'http://localhost:8080'
+    });
+  });
+}
 
 // Initialisation de la base de données avec l'utilitaire dédié
 const { initializeDatabase } = require('./utils/dbInit');
@@ -292,4 +294,4 @@ app.listen(PORT, HOST, () => {
   console.log(`Accessible sur http://localhost:${PORT}`);
   console.log(`Et sur http://${IP}:${PORT}`);
   console.log('Le serveur écoute sur toutes les interfaces réseau');
-}); 
+});
