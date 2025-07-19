@@ -141,10 +141,20 @@ const paymentController = {
   // Webhook pour les événements Stripe
   handleWebhook: async (req, res) => {
     console.log('=== Webhook reçu ===');
+    console.log('URL:', req.url);
+    console.log('Method:', req.method);
+    console.log('Headers:', req.headers);
     console.log('Body type:', typeof req.body);
     console.log('Body length:', req.body ? req.body.length : 'null');
     
     const sig = req.headers['stripe-signature'];
+    console.log('Stripe signature présente:', !!sig);
+    
+    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+      console.error('❌ STRIPE_WEBHOOK_SECRET manquant !');
+      return res.status(500).send('Configuration webhook manquante');
+    }
+    
     let event;
 
     try {
@@ -158,38 +168,49 @@ const paymentController = {
     // Gérer l'événement
     switch (event.type) {
       case 'checkout.session.completed': {
+        console.log('🎉 Traitement checkout.session.completed');
         const session = event.data.object;
+        console.log('Session metadata:', session.metadata);
+        
         const userId = session.metadata.userId;
         const patientIds = session.metadata.patientIds.split(',');
+        
+        console.log('UserId:', userId, 'PatientIds:', patientIds);
 
         // Mettre à jour le statut de l'abonnement pour tous les patients de l'utilisateur
-        await Patient.update({
+        const updateResult = await Patient.update({
           subscriptionStatus: 'active',
           subscriptionEndDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 an
           stripeSubscriptionId: session.subscription
         }, {
           where: { id: patientIds }
         });
-
-        console.log(`Abonnement activé pour l'utilisateur ${userId} et patients ${patientIds.join(', ')}`);
+        
+        console.log('Résultat mise à jour patients:', updateResult);
+        console.log(`✅ Abonnement activé pour l'utilisateur ${userId} et ${patientIds.length} patients`);
         break;
       }
       case 'customer.subscription.deleted': {
+        console.log('⏰ Traitement customer.subscription.deleted');
         const subscription = event.data.object;
+        console.log('Subscription ID:', subscription.id);
         
         // Trouver les patients avec cet abonnement Stripe
         const patients = await Patient.findAll({
           where: { stripeSubscriptionId: subscription.id }
         });
+        
+        console.log('Patients trouvés:', patients.length);
 
         if (patients.length > 0) {
-          await Patient.update({
+          const updateResult = await Patient.update({
             subscriptionStatus: 'expired'
           }, {
             where: { stripeSubscriptionId: subscription.id }
           });
-
-          console.log(`Abonnement expiré pour ${patients.length} patients`);
+          
+          console.log('Résultat expiration:', updateResult);
+          console.log(`✅ Abonnement expiré pour ${patients.length} patients`);
         }
         break;
       }
@@ -212,9 +233,29 @@ const paymentController = {
         }
         break;
       }
+      default:
+        console.log(`⚠️ Événement non géré: ${event.type}`);
+        break;
     }
 
+    console.log('✅ Webhook traité avec succès');
     res.json({ received: true });
+  },
+
+  // Endpoint de test pour vérifier les webhooks
+  testWebhook: async (req, res) => {
+    console.log('=== Test Webhook ===');
+    console.log('STRIPE_WEBHOOK_SECRET défini:', !!process.env.STRIPE_WEBHOOK_SECRET);
+    console.log('STRIPE_SECRET_KEY défini:', !!process.env.STRIPE_SECRET_KEY);
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    
+    res.json({
+      message: 'Endpoint webhook accessible',
+      webhookSecret: !!process.env.STRIPE_WEBHOOK_SECRET,
+      stripeKey: !!process.env.STRIPE_SECRET_KEY,
+      nodeEnv: process.env.NODE_ENV,
+      timestamp: new Date().toISOString()
+    });
   }
 };
 
