@@ -1,4 +1,4 @@
-# Documentation technique Cartissimo
+# Documentation technique du site Cartissimo
 
 ## Table des matières
 1. [Vue d'ensemble du projet](#vue-densemble-du-projet)
