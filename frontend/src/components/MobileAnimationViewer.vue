@@ -5,15 +5,25 @@
       <div class="mobile-animation-display">
         <div class="mobile-animation-header">
           <h3 class="mobile-animation-title">
-            {{ currentAnimation?.name }}
+            {{ currentStep === 'animated' ? 'Version animée' : 'Version réelle' }}
           </h3>
+          <div class="mobile-step-indicator">
+            <span class="step-dot" :class="{ active: currentStep === 'animated' }"></span>
+            <span class="step-dot" :class="{ active: currentStep === 'real' }"></span>
+          </div>
         </div>
         
         <div class="mobile-animation-image-container">
           <img 
-            v-if="currentAnimation?.animatedGifPath"
+            v-if="currentStep === 'animated' && currentAnimation?.animatedGifPath"
             :src="getImagePath(currentAnimation.animatedGifPath)" 
             :alt="currentAnimation.name + ' (animé)'" 
+            class="mobile-animation-image"
+          />
+          <img 
+            v-else-if="currentStep === 'real' && currentAnimation?.realGifPath"
+            :src="getImagePath(currentAnimation.realGifPath)" 
+            :alt="currentAnimation.name + ' (réel)'" 
             class="mobile-animation-image"
           />
         </div>
@@ -78,7 +88,7 @@
 </template>
 
 <script>
-import { computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 export default {
   name: 'MobileAnimationViewer',
@@ -110,20 +120,23 @@ export default {
   },
   emits: ['play-sound', 'next-animation', 'previous-animation', 'go-back'],
   setup(props, { emit }) {
+    const currentStep = ref('animated') // 'animated' ou 'real'
     
     const totalAnimations = computed(() => props.animations.length)
     
     const hasPrevious = computed(() => {
-      return props.currentAnimationIndex > 0
+      return props.currentAnimationIndex > 0 || currentStep.value === 'real'
     })
     
     const hasNext = computed(() => {
-      return props.currentAnimationIndex < totalAnimations.value - 1
+      return props.currentAnimationIndex < totalAnimations.value - 1 || currentStep.value === 'animated'
     })
     
     const progressPercentage = computed(() => {
       if (totalAnimations.value === 0) return 0
-      return (props.currentAnimationIndex / totalAnimations.value) * 100
+      const animationProgress = (props.currentAnimationIndex / totalAnimations.value) * 100
+      const stepProgress = currentStep.value === 'real' ? 50 / totalAnimations.value : 0
+      return Math.min(100, animationProgress + stepProgress)
     })
     
     const playSound = () => {
@@ -131,18 +144,42 @@ export default {
     }
     
     const previousAnimation = () => {
-      emit('previous-animation')
+      if (currentStep.value === 'real') {
+        // Si on est sur la version réelle, revenir à la version animée de la même animation
+        currentStep.value = 'animated'
+      } else {
+        // Si on est sur la version animée, aller à la version réelle de l'animation précédente
+        if (props.currentAnimationIndex > 0) {
+          currentStep.value = 'real'
+          emit('previous-animation')
+        }
+      }
     }
     
     const nextAnimation = () => {
-      emit('next-animation')
+      if (currentStep.value === 'animated') {
+        // Si on est sur la version animée, passer à la version réelle
+        currentStep.value = 'real'
+      } else {
+        // Si on est sur la version réelle, passer à l'animation suivante en version animée
+        if (props.currentAnimationIndex < totalAnimations.value - 1) {
+          currentStep.value = 'animated'
+          emit('next-animation')
+        }
+      }
     }
     
     const goBack = () => {
       emit('go-back')
     }
     
+    // Réinitialiser à la version animée quand on change d'animation
+    watch(() => props.currentAnimationIndex, () => {
+      currentStep.value = 'animated'
+    })
+    
     return {
+      currentStep,
       totalAnimations,
       hasPrevious,
       hasNext,
@@ -188,6 +225,23 @@ export default {
   font-size: 1.3rem;
   font-weight: 600;
   margin: 0;
+}
+
+.mobile-step-indicator {
+  display: flex;
+  gap: 8px;
+}
+
+.step-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #E0E0E0;
+  transition: background 0.3s ease;
+}
+
+.step-dot.active {
+  background: var(--mint);
 }
 
 
