@@ -1,12 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import store from '../store';
 import Login from '../views/Login.vue';
+import Register from '../views/Register.vue';
 import ThemeList from '../views/ThemeList.vue';
 import AnimationViewer from '../views/AnimationViewer.vue';
 import ThemeCreator from '../views/ThemeCreator.vue';
 import AdminPanel from '../views/AdminPanel.vue';
 import ThemeAccessManager from '../views/ThemeAccessManager.vue';
 import DashboardOrthophonistes from '@/views/DashboardOrthophonistes.vue';
+import UserProfile from '../views/UserProfile.vue';
 import PaymentSuccess from '../views/PaymentSuccess.vue';
 import PaymentCancel from '../views/PaymentCancel.vue';
 
@@ -15,6 +17,11 @@ const routes = [
     path: '/',
     name: 'Login',
     component: Login
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: Register
   },
   {
     path: '/themes',
@@ -59,6 +66,12 @@ const routes = [
   path: '/dashboard',
   name: 'DashboardOrthophonistes',
   component: DashboardOrthophonistes
+  },
+  {
+    path: '/profile',
+    name: 'UserProfile',
+    component: UserProfile,
+    meta: { requiresAuth: true }
   },
   {
     path: '/payment/success',

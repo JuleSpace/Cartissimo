@@ -7,6 +7,10 @@
     <div class="navbar-menu">
       <div v-if="isAuthenticated" class="user-info">
         <span class="user-email">{{ currentUser?.email }}</span>
+        <button @click="goToProfile" class="btn btn-secondary profile-button">
+          <i class="fas fa-user"></i>
+          Mon Profil
+        </button>
         <button @click="logout" class="btn btn-primary logout-button">
         <span class="icon">&#x2716;</span>
         Se déconnecter
@@ -37,10 +41,15 @@ export default {
       router.push('/');
     };
 
+    const goToProfile = () => {
+      router.push('/profile');
+    };
+
     return {
       isAuthenticated,
       currentUser,
       logout,
+      goToProfile,
       logoUrl
     };
   }
@@ -72,6 +81,31 @@ export default {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.profile-button {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+  font-size: 0.9rem;
+}
+
+.profile-button:hover {
+  background: rgba(255,255,255,0.3);
+  transform: translateY(-1px);
 }
 
 .logo {

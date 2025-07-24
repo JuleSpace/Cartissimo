@@ -35,6 +35,7 @@ npm install
 3. **Configurer la base de données** :
 - Démarrer XAMPP ou équivalent (MySQL)
 - Créer une bdd nommée Cartissimo
+(Mettez à jour le fichier .env du backend avec les infos de bdd qui sont en commentaires si installation en local)
 - La base devrait se remplir au lancement du backend via le batch.
 
 4. **Préparer le backend** :

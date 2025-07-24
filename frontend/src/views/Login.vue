@@ -25,6 +25,12 @@
       <button type="submit" class="submit-button" :disabled="loading">
         {{ loading ? 'Connexion en cours...' : 'Se connecter' }}
       </button>
+      
+      <div class="register-link">
+        <p>Pas encore de compte ?</p>
+        <router-link to="/register" class="link">S'inscrire en tant que Parent</router-link>
+      </div>
+      
       <p v-if="error" class="error-message">{{ error }}</p>
     </form>
   </div>
@@ -167,6 +173,35 @@ export default {
   background: linear-gradient(135deg, #ccc 0%, #999 100%);
   cursor: not-allowed;
   transform: none;
+}
+
+.register-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid #e1e5e9;
+}
+
+.register-link p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.link {
+  color: var(--blue);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: color 0.3s;
+}
+
+.link:hover {
+  color: var(--blue-light);
+  text-decoration: underline;
 }
 
 .error-message {

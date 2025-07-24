@@ -1,147 +1,381 @@
-const { User } = require('../models');
+const { User, Patient, Orthophoniste } = require('../models');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize');
 
 const userController = {
-  // Obtenir le profil de l'utilisateur connecté
+  // Inscription d'un nouveau parent avec ses enfants
+  register: async (req, res) => {
+    try {
+      console.log('=== Début inscription ===');
+      console.log('Body reçu:', req.body);
+
+      const { 
+        email, 
+        password, 
+        firstName, 
+        lastName, 
+        children,
+        orthophonisteId 
+      } = req.body;
+
+      // Validation des données requises
+      if (!email || !password || !firstName || !lastName) {
+        return res.status(400).json({ 
+          message: 'Email, mot de passe, prénom et nom sont requis' 
+        });
+      }
+
+      if (!children || !Array.isArray(children) || children.length === 0) {
+        return res.status(400).json({ 
+          message: 'Au moins un enfant doit être renseigné' 
+        });
+      }
+
+      // Vérifier si l'email existe déjà
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) {
+        return res.status(400).json({ 
+          message: 'Un compte avec cet email existe déjà' 
+        });
+      }
+
+      // Vérifier que l'orthophoniste existe si spécifié
+      if (orthophonisteId) {
+        const ortho = await Orthophoniste.findByPk(orthophonisteId);
+        if (!ortho) {
+          return res.status(400).json({ 
+            message: 'Orthophoniste non trouvé' 
+          });
+        }
+      }
+
+      // Créer l'utilisateur parent
+      const user = await User.create({
+        email,
+        password, // Le hashage se fait automatiquement via le hook beforeCreate
+        firstName,
+        lastName,
+        role: 'parent',
+        subscriptionRequired: true
+      });
+
+      console.log('Utilisateur créé:', user.id);
+
+      // Créer les enfants (patients)
+      const createdChildren = [];
+      for (const child of children) {
+        const { firstName: childFirstName, lastName: childLastName, birthDate } = child;
+        
+        if (!childFirstName || !childLastName || !birthDate) {
+          return res.status(400).json({ 
+            message: 'Prénom, nom et date de naissance sont requis pour chaque enfant' 
+          });
+        }
+
+        const patient = await Patient.create({
+          firstName: childFirstName,
+          lastName: childLastName,
+          birthDate,
+          parentEmail: email,
+          userId: user.id,
+          subscriptionStatus: 'inactive',
+          orthophonisteId: orthophonisteId || null
+        });
+
+        createdChildren.push(patient);
+        console.log('Enfant créé:', patient.id, childFirstName, childLastName);
+      }
+
+      // Générer un token JWT
+      const token = jwt.sign(
+        { 
+          id: user.id, 
+          email: user.email, 
+          role: user.role 
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      console.log('=== Inscription réussie ===');
+
+      res.status(201).json({
+        message: 'Inscription réussie',
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role
+        },
+        children: createdChildren.map(child => ({
+          id: child.id,
+          firstName: child.firstName,
+          lastName: child.lastName,
+          birthDate: child.birthDate
+        })),
+        token
+      });
+
+    } catch (error) {
+      console.error('Erreur lors de l\'inscription:', error);
+      res.status(500).json({ 
+        message: 'Erreur serveur lors de l\'inscription' 
+      });
+    }
+  },
+
+  // Récupérer le profil utilisateur avec ses enfants
   getProfile: async (req, res) => {
     try {
-      const user = await User.findByPk(req.user.id, {
+      const userId = req.user.id;
+
+      const user = await User.findByPk(userId, {
+        include: [
+          {
+            model: Patient,
+            as: 'patients',
+            include: [
+              {
+                model: Orthophoniste,
+                as: 'orthophoniste',
+                attributes: ['id', 'firstName', 'lastName', 'email']
+              }
+            ]
+          }
+        ],
         attributes: { exclude: ['password'] }
       });
-      res.json(user);
+
+      if (!user) {
+        return res.status(404).json({ message: 'Utilisateur non trouvé' });
+      }
+
+      res.json({
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          subscriptionRequired: user.subscriptionRequired
+        },
+        children: user.patients || []
+      });
+
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      console.error('Erreur lors de la récupération du profil:', error);
+      res.status(500).json({ message: 'Erreur serveur' });
     }
   },
 
-  // Mettre à jour le profil de l'utilisateur connecté
+  // Mettre à jour le profil utilisateur
   updateProfile: async (req, res) => {
     try {
+      const userId = req.user.id;
       const { firstName, lastName, email } = req.body;
-      const user = await User.findByPk(req.user.id);
 
+      // Vérifier si l'email est déjà utilisé par un autre utilisateur
+      if (email && email !== req.user.email) {
+        const existingUser = await User.findOne({ 
+          where: { 
+            email,
+            id: { [Op.ne]: userId }
+          }
+        });
+        
+        if (existingUser) {
+          return res.status(400).json({ 
+            message: 'Cet email est déjà utilisé par un autre compte' 
+          });
+        }
+      }
+
+      const user = await User.findByPk(userId);
       if (!user) {
         return res.status(404).json({ message: 'Utilisateur non trouvé' });
       }
 
-      await user.update({
+      // Mettre à jour les champs fournis
+      if (firstName) user.firstName = firstName;
+      if (lastName) user.lastName = lastName;
+      if (email) user.email = email;
+
+      await user.save();
+
+      res.json({
+        message: 'Profil mis à jour avec succès',
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role
+        }
+      });
+
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du profil:', error);
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  },
+
+  // Ajouter un enfant
+  addChild: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { firstName, lastName, birthDate, orthophonisteId } = req.body;
+
+      if (!firstName || !lastName || !birthDate) {
+        return res.status(400).json({ 
+          message: 'Prénom, nom et date de naissance sont requis' 
+        });
+      }
+
+      // Vérifier que l'orthophoniste existe si spécifié
+      if (orthophonisteId) {
+        const ortho = await Orthophoniste.findByPk(orthophonisteId);
+        if (!ortho) {
+          return res.status(400).json({ 
+            message: 'Orthophoniste non trouvé' 
+          });
+        }
+      }
+
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'Utilisateur non trouvé' });
+      }
+
+      const patient = await Patient.create({
         firstName,
         lastName,
-        email
+        birthDate,
+        parentEmail: user.email,
+        userId: userId,
+        subscriptionStatus: 'inactive',
+        orthophonisteId: orthophonisteId || null
       });
 
-      res.json(user);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  },
-
-  // Mettre à jour le mot de passe de l'utilisateur connecté
-  updatePassword: async (req, res) => {
-    try {
-      const { currentPassword, newPassword } = req.body;
-      const user = await User.findByPk(req.user.id);
-
-      if (!user) {
-        return res.status(404).json({ message: 'Utilisateur non trouvé' });
-      }
-
-      const isValidPassword = await bcrypt.compare(currentPassword, user.password);
-      if (!isValidPassword) {
-        return res.status(401).json({ message: 'Mot de passe actuel incorrect' });
-      }
-
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-      await user.update({ password: hashedPassword });
-      res.json({ message: 'Mot de passe mis à jour avec succès' });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  },
-
-  // Obtenir tous les utilisateurs (admin uniquement)
-  getAllUsers: async (req, res) => {
-    try {
-      if (req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Accès non autorisé' });
-      }
-
-      const users = await User.findAll({
-        attributes: { exclude: ['password'] }
-      });
-      res.json(users);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  },
-
-  // Obtenir un utilisateur par ID (admin uniquement)
-  getUserById: async (req, res) => {
-    try {
-      if (req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Accès non autorisé' });
-      }
-
-      const user = await User.findByPk(req.params.id, {
-        attributes: { exclude: ['password'] }
+      res.status(201).json({
+        message: 'Enfant ajouté avec succès',
+        child: {
+          id: patient.id,
+          firstName: patient.firstName,
+          lastName: patient.lastName,
+          birthDate: patient.birthDate,
+          orthophonisteId: patient.orthophonisteId
+        }
       });
 
-      if (!user) {
-        return res.status(404).json({ message: 'Utilisateur non trouvé' });
-      }
-
-      res.json(user);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      console.error('Erreur lors de l\'ajout de l\'enfant:', error);
+      res.status(500).json({ message: 'Erreur serveur' });
     }
   },
 
-  // Mettre à jour un utilisateur (admin uniquement)
-  updateUser: async (req, res) => {
+  // Mettre à jour un enfant
+  updateChild: async (req, res) => {
     try {
-      if (req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Accès non autorisé' });
-      }
+      const userId = req.user.id;
+      const { childId } = req.params;
+      const { firstName, lastName, birthDate, orthophonisteId } = req.body;
 
-      const { firstName, lastName, email, role } = req.body;
-      const user = await User.findByPk(req.params.id);
-
-      if (!user) {
-        return res.status(404).json({ message: 'Utilisateur non trouvé' });
-      }
-
-      await user.update({
-        firstName,
-        lastName,
-        email,
-        role
+      // Vérifier que l'enfant appartient à l'utilisateur
+      const patient = await Patient.findOne({
+        where: { 
+          id: childId,
+          userId: userId 
+        }
       });
 
-      res.json(user);
+      if (!patient) {
+        return res.status(404).json({ 
+          message: 'Enfant non trouvé ou accès non autorisé' 
+        });
+      }
+
+      // Vérifier que l'orthophoniste existe si spécifié
+      if (orthophonisteId) {
+        const ortho = await Orthophoniste.findByPk(orthophonisteId);
+        if (!ortho) {
+          return res.status(400).json({ 
+            message: 'Orthophoniste non trouvé' 
+          });
+        }
+      }
+
+      // Mettre à jour les champs fournis
+      if (firstName) patient.firstName = firstName;
+      if (lastName) patient.lastName = lastName;
+      if (birthDate) patient.birthDate = birthDate;
+      if (orthophonisteId !== undefined) patient.orthophonisteId = orthophonisteId;
+
+      await patient.save();
+
+      res.json({
+        message: 'Enfant mis à jour avec succès',
+        child: {
+          id: patient.id,
+          firstName: patient.firstName,
+          lastName: patient.lastName,
+          birthDate: patient.birthDate,
+          orthophonisteId: patient.orthophonisteId
+        }
+      });
+
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      console.error('Erreur lors de la mise à jour de l\'enfant:', error);
+      res.status(500).json({ message: 'Erreur serveur' });
     }
   },
 
-  // Supprimer un utilisateur (admin uniquement)
-  deleteUser: async (req, res) => {
+  // Supprimer un enfant
+  deleteChild: async (req, res) => {
     try {
-      if (req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Accès non autorisé' });
+      const userId = req.user.id;
+      const { childId } = req.params;
+
+      // Vérifier que l'enfant appartient à l'utilisateur
+      const patient = await Patient.findOne({
+        where: { 
+          id: childId,
+          userId: userId 
+        }
+      });
+
+      if (!patient) {
+        return res.status(404).json({ 
+          message: 'Enfant non trouvé ou accès non autorisé' 
+        });
       }
 
-      const user = await User.findByPk(req.params.id);
+      await patient.destroy();
 
-      if (!user) {
-        return res.status(404).json({ message: 'Utilisateur non trouvé' });
-      }
+      res.json({
+        message: 'Enfant supprimé avec succès'
+      });
 
-      await user.destroy();
-      res.json({ message: 'Utilisateur supprimé avec succès' });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      console.error('Erreur lors de la suppression de l\'enfant:', error);
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  },
+
+  // Récupérer la liste des orthophonistes pour le formulaire d'inscription
+  getOrthophonistes: async (req, res) => {
+    try {
+      const orthophonistes = await Orthophoniste.findAll({
+        attributes: ['id', 'firstName', 'lastName', 'email', 'city'],
+        order: [['lastName', 'ASC'], ['firstName', 'ASC']]
+      });
+
+      res.json(orthophonistes);
+
+    } catch (error) {
+      console.error('Erreur lors de la récupération des orthophonistes:', error);
+      res.status(500).json({ message: 'Erreur serveur' });
     }
   }
 };
