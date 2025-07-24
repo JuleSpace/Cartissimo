@@ -6,6 +6,7 @@ const path = require('path');
 
 // Routes
 const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/user');
 const themeRoutes = require('./routes/theme');
 const animationRoutes = require('./routes/animation');
 const patientRoutes = require('./routes/patient');
@@ -78,6 +79,7 @@ app.get('/api/health', (req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/themes', themeRoutes);
 app.use('/api/animations', animationRoutes);
 app.use('/api/patients', patientRoutes);

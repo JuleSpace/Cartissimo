@@ -246,8 +246,10 @@ export default {
       try {
         const response = await axios.get(`${API_URL}/users/orthophonistes`);
         orthophonistes.value = response.data;
+        console.log('Orthophonistes chargés:', orthophonistes.value);
       } catch (err) {
         console.error('Erreur lors du chargement des orthophonistes:', err);
+        console.error('Détails:', err.response?.data);
       }
     };
 
@@ -358,7 +360,7 @@ export default {
   align-items: flex-start;
   min-height: 100vh;
   padding: 40px 20px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background-color: var(--bg-primary);
 }
 
 .register-form {
