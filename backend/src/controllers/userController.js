@@ -221,6 +221,54 @@ const userController = {
     }
   },
 
+  // Changer le mot de passe
+  updatePassword: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { currentPassword, newPassword } = req.body;
+
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ 
+          message: 'Mot de passe actuel et nouveau mot de passe sont requis' 
+        });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ 
+          message: 'Le nouveau mot de passe doit contenir au moins 6 caractères' 
+        });
+      }
+
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'Utilisateur non trouvé' });
+      }
+
+      // Vérifier le mot de passe actuel
+      const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+      if (!isCurrentPasswordValid) {
+        return res.status(400).json({ 
+          message: 'Mot de passe actuel incorrect' 
+        });
+      }
+
+      // Hasher le nouveau mot de passe
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+      
+      // Mettre à jour le mot de passe
+      user.password = hashedNewPassword;
+      await user.save();
+
+      res.json({
+        message: 'Mot de passe mis à jour avec succès'
+      });
+
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du mot de passe:', error);
+      res.status(500).json({ message: 'Erreur serveur' });
+    }
+  },
+
   // Ajouter un enfant
   addChild: async (req, res) => {
     try {

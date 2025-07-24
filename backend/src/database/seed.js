@@ -1386,7 +1386,7 @@ if (require.main === module) {
     })
     .catch((error) => {
       console.error('❌ Erreur lors du seed:', error);
-      process.exit(1);
+    process.exit(1);
     });
 }
 

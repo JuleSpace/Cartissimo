@@ -14,7 +14,7 @@ const getServerUrl = () => {
   if (process.env.NODE_ENV === 'production') {
     return window.location.origin;
   } else {
-    const IP = process.env.VUE_APP_IP || 'localhost';
+const IP = process.env.VUE_APP_IP || 'localhost';
     return `http://${IP}:3000`;
   }
 };

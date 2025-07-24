@@ -67,26 +67,20 @@
             <!-- Version desktop (tableau) -->
             <div class="children-table desktop-only">
               <table>
-                <thead>
-                  <tr>
-                    <th>Nom</th>
-                    <th>Âge</th>
-                    <th>Orthophoniste</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="child in children" :key="child.id">
-                    <td>{{ child.firstName }} {{ child.lastName }}</td>
-                    <td>{{ calculateAge(child.birthDate) }} ans</td>
-                    <td>{{ child.orthophoniste?.firstName }} {{ child.orthophoniste?.lastName }}</td>
-                    <td>
-                      <button @click="deleteChild(child)" class="btn-delete-child">
-                        Supprimer
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
+                                 <thead>
+                   <tr>
+                     <th>Nom</th>
+                     <th>Âge</th>
+                     <th>Orthophoniste</th>
+                   </tr>
+                 </thead>
+                                 <tbody>
+                   <tr v-for="child in children" :key="child.id">
+                     <td>{{ child.firstName }} {{ child.lastName }}</td>
+                     <td>{{ calculateAge(child.birthDate) }} ans</td>
+                     <td>{{ child.orthophoniste?.firstName }} {{ child.orthophoniste?.lastName || 'Non assigné' }}</td>
+                   </tr>
+                 </tbody>
               </table>
             </div>
 
@@ -97,22 +91,16 @@
                   <h4>{{ child.firstName }} {{ child.lastName }}</h4>
                   <span class="child-age">{{ calculateAge(child.birthDate) }} ans</span>
                 </div>
-                <div class="child-details">
-                  <div class="child-info">
-                    <span class="info-label">Orthophoniste:</span>
-                    <span class="info-value">{{ child.orthophoniste?.firstName }} {{ child.orthophoniste?.lastName || 'Non assigné' }}</span>
-                  </div>
-                  <div class="child-info">
-                    <span class="info-label">Date d'ajout:</span>
-                    <span class="info-value">{{ formatDate(child.createdAt) }}</span>
-                  </div>
-                </div>
-                <div class="child-actions">
-                  <button @click="deleteChild(child)" class="btn-delete-child mobile-btn">
-                    <span class="icon">🗑️</span>
-                    Supprimer
-                  </button>
-                </div>
+                                 <div class="child-details">
+                   <div class="child-info">
+                     <span class="info-label">Orthophoniste:</span>
+                     <span class="info-value">{{ child.orthophoniste?.firstName }} {{ child.orthophoniste?.lastName || 'Non assigné' }}</span>
+                   </div>
+                   <div class="child-info">
+                     <span class="info-label">Date d'ajout:</span>
+                     <span class="info-value">{{ formatDate(child.createdAt) }}</span>
+                   </div>
+                 </div>
               </div>
             </div>
           </div>
@@ -226,27 +214,7 @@ export default {
       }
     }
     
-    // Supprimer un enfant
-    const deleteChild = async (child) => {
-      if (!confirm(`Êtes-vous sûr de vouloir supprimer ${child.firstName} ${child.lastName} ?`)) {
-        return
-      }
-      
-      try {
-        const token = localStorage.getItem('token');
-        await axios.delete(`/users/children/${child.id}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
-        
-        // Recharger les données
-        await loadParents()
-        await viewChildren(selectedParent.value)
-      } catch (err) {
-        error.value = err.response?.data?.message || 'Erreur lors de la suppression'
-      }
-    }
+
     
     // Fermer le modal des enfants
     const closeChildrenModal = () => {
@@ -296,7 +264,6 @@ export default {
       loadParents,
       viewChildren,
       deleteParent,
-      deleteChild,
       closeChildrenModal,
       calculateAge,
       formatDate

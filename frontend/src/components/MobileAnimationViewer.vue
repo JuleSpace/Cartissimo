@@ -5,25 +5,15 @@
       <div class="mobile-animation-display">
         <div class="mobile-animation-header">
           <h3 class="mobile-animation-title">
-            {{ currentStep === 'animated' ? 'Version animée' : 'Version réelle' }}
+            {{ currentAnimation?.name }}
           </h3>
-          <div class="mobile-step-indicator">
-            <span class="step-dot" :class="{ active: currentStep === 'animated' }"></span>
-            <span class="step-dot" :class="{ active: currentStep === 'real' }"></span>
-          </div>
         </div>
         
         <div class="mobile-animation-image-container">
           <img 
-            v-if="currentStep === 'animated' && currentAnimation?.animatedGifPath"
+            v-if="currentAnimation?.animatedGifPath"
             :src="getImagePath(currentAnimation.animatedGifPath)" 
             :alt="currentAnimation.name + ' (animé)'" 
-            class="mobile-animation-image"
-          />
-          <img 
-            v-else-if="currentStep === 'real' && currentAnimation?.realGifPath"
-            :src="getImagePath(currentAnimation.realGifPath)" 
-            :alt="currentAnimation.name + ' (réel)'" 
             class="mobile-animation-image"
           />
         </div>
@@ -31,26 +21,6 @@
 
       <!-- Contrôles mobiles -->
       <div class="mobile-controls">
-        <div class="mobile-controls-row">
-          <button 
-            @click="playSound" 
-            class="mobile-control-button sound-button"
-            :disabled="!currentSound"
-          >
-            <span class="icon">🔊</span>
-            Son
-          </button>
-          
-          <button 
-            @click="nextStep" 
-            class="mobile-control-button next-button"
-            :disabled="currentStep === 'real' && !hasNext"
-          >
-            <span class="icon">→</span>
-            {{ currentStep === 'animated' ? 'Version réelle' : 'Suivant' }}
-          </button>
-        </div>
-        
         <div class="mobile-controls-row">
           <button 
             @click="previousAnimation" 
@@ -73,8 +43,17 @@
         
         <div class="mobile-controls-row">
           <button 
+            @click="playSound" 
+            class="mobile-control-button sound-button"
+            :disabled="!currentSound"
+          >
+            <span class="icon">🔊</span>
+            Son
+          </button>
+          
+          <button 
             @click="goBack" 
-            class="mobile-control-button back-button full-width"
+            class="mobile-control-button back-button"
           >
             <span class="icon">⌂</span>
             Retour aux thèmes
@@ -99,7 +78,7 @@
 </template>
 
 <script>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 
 export default {
   name: 'MobileAnimationViewer',
@@ -131,12 +110,11 @@ export default {
   },
   emits: ['play-sound', 'next-animation', 'previous-animation', 'go-back'],
   setup(props, { emit }) {
-    const currentStep = ref('animated') // 'animated' ou 'real'
     
     const totalAnimations = computed(() => props.animations.length)
     
     const hasPrevious = computed(() => {
-      return props.currentAnimationIndex > 0 || currentStep.value === 'real'
+      return props.currentAnimationIndex > 0
     })
     
     const hasNext = computed(() => {
@@ -145,37 +123,15 @@ export default {
     
     const progressPercentage = computed(() => {
       if (totalAnimations.value === 0) return 0
-      const animationProgress = (props.currentAnimationIndex / totalAnimations.value) * 100
-      const stepProgress = currentStep.value === 'real' ? 50 / totalAnimations.value : 0
-      return Math.min(100, animationProgress + stepProgress)
+      return (props.currentAnimationIndex / totalAnimations.value) * 100
     })
     
     const playSound = () => {
       emit('play-sound')
     }
     
-    const nextStep = () => {
-      if (currentStep.value === 'animated') {
-        currentStep.value = 'real'
-      } else {
-        // Passer à l'animation suivante et revenir à la version animée
-        if (hasNext.value) {
-          currentStep.value = 'animated'
-          emit('next-animation')
-        }
-      }
-    }
-    
     const previousAnimation = () => {
-      if (currentStep.value === 'real') {
-        currentStep.value = 'animated'
-      } else {
-        // Revenir à l'animation précédente et aller à la version réelle
-        if (props.currentAnimationIndex > 0) {
-          currentStep.value = 'real'
-          emit('previous-animation')
-        }
-      }
+      emit('previous-animation')
     }
     
     const nextAnimation = () => {
@@ -186,22 +142,12 @@ export default {
       emit('go-back')
     }
     
-    // Réinitialiser à la version animée quand on change d'animation
-    watch(() => props.currentAnimationIndex, () => {
-      if (currentStep.value === 'real') {
-        // Si on était sur la version réelle, on peut rester dessus
-        // Sinon on repart sur animée
-      }
-    })
-    
     return {
-      currentStep,
       totalAnimations,
       hasPrevious,
       hasNext,
       progressPercentage,
       playSound,
-      nextStep,
       previousAnimation,
       nextAnimation,
       goBack
@@ -244,22 +190,7 @@ export default {
   margin: 0;
 }
 
-.mobile-step-indicator {
-  display: flex;
-  gap: 8px;
-}
 
-.step-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #E0E0E0;
-  transition: background 0.3s ease;
-}
-
-.step-dot.active {
-  background: var(--mint);
-}
 
 .mobile-animation-image-container {
   display: flex;
@@ -317,16 +248,7 @@ export default {
   box-shadow: 0 4px 12px rgba(255, 215, 92, 0.4);
 }
 
-.next-button {
-  background: linear-gradient(135deg, #7FD1F4 0%, #4B95DE 100%);
-  color: white;
-  box-shadow: 0 2px 8px rgba(75, 149, 222, 0.3);
-}
 
-.next-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(75, 149, 222, 0.4);
-}
 
 .nav-button {
   background: linear-gradient(135deg, #FF8A80 0%, #FF5722 100%);
@@ -348,11 +270,6 @@ export default {
 .back-button:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 187, 106, 0.4);
-}
-
-.full-width {
-  flex: none !important;
-  width: 100% !important;
 }
 
 .mobile-control-button:disabled {

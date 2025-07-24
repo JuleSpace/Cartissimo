@@ -24,7 +24,7 @@ const paymentController = {
         FRONTEND_URL = baseUrl;
       } else {
         // En développement, utiliser localhost
-        const IP = process.env.IP || 'localhost';
+      const IP = process.env.IP || 'localhost';
         FRONTEND_URL = `http://${IP}:8080`;
       }
       
@@ -185,7 +185,7 @@ const paymentController = {
         }, {
           where: { id: patientIds }
         });
-        
+
         console.log('Résultat mise à jour patients:', updateResult);
         console.log(`✅ Abonnement activé pour l'utilisateur ${userId} et ${patientIds.length} patients`);
         break;
@@ -208,7 +208,7 @@ const paymentController = {
           }, {
             where: { stripeSubscriptionId: subscription.id }
           });
-          
+
           console.log('Résultat expiration:', updateResult);
           console.log(`✅ Abonnement expiré pour ${patients.length} patients`);
         }

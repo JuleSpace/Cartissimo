@@ -88,8 +88,84 @@
         </div>
       </div>
 
-      <!-- Section Enfants -->
+      <!-- Section Modification du mot de passe -->
       <div class="profile-section">
+        <div class="section-header">
+          <h2>
+            <i class="fas fa-lock"></i>
+            Sécurité
+          </h2>
+          <button @click="toggleEditPassword" class="btn-edit">
+            <i class="fas fa-key"></i>
+            {{ editingPassword ? 'Annuler' : 'Changer mot de passe' }}
+          </button>
+        </div>
+
+        <div class="info-card">
+          <div v-if="!editingPassword" class="password-info">
+            <div class="info-item">
+              <label>Mot de passe :</label>
+              <span>••••••••</span>
+            </div>
+            <p class="password-hint">
+              <i class="fas fa-info-circle"></i>
+              Votre mot de passe est sécurisé et chiffré
+            </p>
+          </div>
+
+          <form v-else @submit.prevent="updatePassword" class="edit-form">
+            <div class="form-group">
+              <label for="currentPassword">Mot de passe actuel *</label>
+              <input
+                id="currentPassword"
+                v-model="passwordForm.currentPassword"
+                type="password"
+                required
+                placeholder="Entrez votre mot de passe actuel"
+              >
+            </div>
+            <div class="form-group">
+              <label for="newPassword">Nouveau mot de passe *</label>
+              <input
+                id="newPassword"
+                v-model="passwordForm.newPassword"
+                type="password"
+                required
+                placeholder="Entrez votre nouveau mot de passe (min. 6 caractères)"
+                minlength="6"
+              >
+            </div>
+            <div class="form-group">
+              <label for="confirmPassword">Confirmer le nouveau mot de passe *</label>
+              <input
+                id="confirmPassword"
+                v-model="passwordForm.confirmPassword"
+                type="password"
+                required
+                placeholder="Confirmez votre nouveau mot de passe"
+                minlength="6"
+              >
+            </div>
+            <div v-if="passwordForm.newPassword && passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword" class="password-error">
+              <i class="fas fa-exclamation-triangle"></i>
+              Les mots de passe ne correspondent pas
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn-primary" :disabled="passwordLoading || !isPasswordFormValid">
+                <i v-if="passwordLoading" class="fas fa-spinner fa-spin"></i>
+                <i v-else class="fas fa-save"></i>
+                {{ passwordLoading ? 'Modification...' : 'Modifier le mot de passe' }}
+              </button>
+              <button type="button" @click="cancelEditPassword" class="btn-secondary">
+                Annuler
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Section Enfants (uniquement pour les parents) -->
+      <div v-if="profileData.user.role === 'parent'" class="profile-section">
         <div class="section-header">
           <h2>
             <i class="fas fa-child"></i>
@@ -276,6 +352,15 @@ export default {
     const editForm = ref({});
     const updateLoading = ref(false);
 
+    // États de modification du mot de passe
+    const editingPassword = ref(false);
+    const passwordForm = ref({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    });
+    const passwordLoading = ref(false);
+
     // États de gestion des enfants
     const showChildModal = ref(false);
     const editingChild = ref(null);
@@ -361,6 +446,65 @@ export default {
         error.value = err.response?.data?.message || 'Erreur lors de la mise à jour';
       } finally {
         updateLoading.value = false;
+      }
+    };
+
+    // Validation du formulaire de mot de passe
+    const isPasswordFormValid = computed(() => {
+      return passwordForm.value.currentPassword &&
+             passwordForm.value.newPassword &&
+             passwordForm.value.confirmPassword &&
+             passwordForm.value.newPassword === passwordForm.value.confirmPassword &&
+             passwordForm.value.newPassword.length >= 6;
+    });
+
+    // Gestion du mot de passe
+    const toggleEditPassword = () => {
+      if (editingPassword.value) {
+        cancelEditPassword();
+      } else {
+        passwordForm.value = {
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        };
+        editingPassword.value = true;
+      }
+    };
+
+    const cancelEditPassword = () => {
+      editingPassword.value = false;
+      passwordForm.value = {
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      };
+    };
+
+    const updatePassword = async () => {
+      try {
+        passwordLoading.value = true;
+        
+        const token = localStorage.getItem('token');
+        await axios.put(`${API_URL}/users/password`, passwordForm.value, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        editingPassword.value = false;
+        passwordForm.value = {
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        };
+
+        // Afficher un message de succès (optionnel)
+        alert('Mot de passe modifié avec succès !');
+
+      } catch (err) {
+        console.error('Erreur lors de la modification du mot de passe:', err);
+        error.value = err.response?.data?.message || 'Erreur lors de la modification du mot de passe';
+      } finally {
+        passwordLoading.value = false;
       }
     };
 
@@ -505,6 +649,10 @@ export default {
       editingProfile,
       editForm,
       updateLoading,
+      editingPassword,
+      passwordForm,
+      passwordLoading,
+      isPasswordFormValid,
       showChildModal,
       editingChild,
       childForm,
@@ -519,6 +667,9 @@ export default {
       toggleEditProfile,
       cancelEditProfile,
       updateProfile,
+      toggleEditPassword,
+      cancelEditPassword,
+      updatePassword,
       openAddChildModal,
       editChild,
       closeChildModal,
@@ -961,6 +1112,38 @@ export default {
 .warning {
   color: #dc3545;
   font-weight: 600;
+}
+
+.password-info {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.password-hint {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.password-hint i {
+  color: var(--blue);
+}
+
+.password-error {
+  color: #dc3545;
+  font-size: 0.9rem;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: #ffebee;
+  border-radius: 6px;
+  border-left: 4px solid #dc3545;
 }
 
 @media (max-width: 768px) {

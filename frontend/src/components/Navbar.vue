@@ -6,7 +6,6 @@
     </div>
     <div class="navbar-menu">
       <div v-if="isAuthenticated" class="user-info">
-        <span class="user-email">{{ currentUser?.email }}</span>
         <button @click="goToProfile" class="btn btn-secondary profile-button">
           <i class="fas fa-user"></i>
           Mon Profil
@@ -132,16 +131,7 @@ export default {
   gap: var(--spacing-md);
 }
 
-.user-email {
-  color: var(--text-light);
-  font-size: 0.9rem;
-  font-weight: 500;
-  opacity: 0.9;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--border-radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
+
 
 .logout-button {
   display: flex;
@@ -194,11 +184,6 @@ export default {
   .user-info {
     gap: var(--spacing-sm);
   }
-
-  .user-email {
-    font-size: 0.8rem;
-    padding: var(--spacing-xs);
-  }
 }
 
 @media (max-width: 480px) {
@@ -231,15 +216,6 @@ export default {
 
   .user-info {
     gap: var(--spacing-xs);
-  }
-
-  .user-email {
-    font-size: 0.75rem;
-    padding: var(--spacing-xs);
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 }
 </style> 

@@ -12,6 +12,7 @@ router.get('/orthophonistes', userController.getOrthophonistes);
 // Routes protégées (nécessitent une authentification)
 router.get('/profile', auth, userController.getProfile);
 router.put('/profile', auth, userController.updateProfile);
+router.put('/password', auth, userController.updatePassword);
 
 // Routes pour la gestion des enfants
 router.post('/children', auth, userController.addChild);
