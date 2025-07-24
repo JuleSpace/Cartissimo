@@ -402,18 +402,17 @@ export default {
         childLoading.value = true;
         
         const token = localStorage.getItem('token');
-        let response;
 
         if (editingChild.value) {
           // Mise à jour
-          response = await axios.put(
+          await axios.put(
             `${API_URL}/users/children/${editingChild.value.id}`,
             childForm.value,
             { headers: { Authorization: `Bearer ${token}` } }
           );
         } else {
           // Création
-          response = await axios.post(
+          await axios.post(
             `${API_URL}/users/children`,
             childForm.value,
             { headers: { Authorization: `Bearer ${token}` } }
