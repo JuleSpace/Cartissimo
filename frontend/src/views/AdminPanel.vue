@@ -31,6 +31,13 @@
         Gestion des orthophonistes
       </button>
       <button 
+        @click="currentSection = 'parents'" 
+        :class="['nav-button', { active: currentSection === 'parents' }]"
+      >
+        <span class="nav-icon">👨‍👩‍👧‍👦</span>
+        Gestion des parents
+      </button>
+      <button 
         @click="currentSection = 'patients'" 
         :class="['nav-button', { active: currentSection === 'patients' }]"
       >
@@ -75,6 +82,11 @@
         <OrthophonisteManagement ref="orthophonisteManagementRef" />
       </section>
 
+      <!-- Section des parents -->
+      <section v-if="currentSection === 'parents'" class="admin-section">
+        <ParentManagement ref="parentManagementRef" />
+      </section>
+
       <!-- Section des patients sans orthophoniste -->
       <section v-if="currentSection === 'patients'" class="admin-section">
         <UnassignedPatients ref="unassignedPatientsRef" />
@@ -87,6 +99,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useStore } from 'vuex';
 import OrthophonisteManagement from '@/components/OrthophonisteManagement.vue';
+import ParentManagement from '@/components/ParentManagement.vue';
 import UnassignedPatients from '@/components/UnassignedPatients.vue';
 import ThemeOrderManager from '@/components/ThemeOrderManager.vue';
 
@@ -94,6 +107,7 @@ export default {
   name: 'AdminPanel',
   components: {
     OrthophonisteManagement,
+    ParentManagement,
     UnassignedPatients,
     ThemeOrderManager
   },

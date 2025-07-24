@@ -39,6 +39,9 @@
         >
           <h3>{{ patient.firstName }} {{ patient.lastName }}</h3>
           <p>Date de naissance : {{ formatDate(patient.birthDate) }}</p>
+          <p v-if="patient.parent?.email" class="parent-email">
+            <strong>Parent :</strong> {{ patient.parent.email }}
+          </p>
           <p>
             Abonnement :
             <span :class="statusColor(patient.subscriptionStatus)">
@@ -276,6 +279,12 @@ const expiredCount = computed(() =>
 .sub-date {
   font-size: 0.8rem;
   color: #666;
+}
+
+.parent-email {
+  color: #4B95DE;
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
 }
 
 .loading,

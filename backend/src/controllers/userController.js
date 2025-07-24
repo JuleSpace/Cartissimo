@@ -377,6 +377,130 @@ const userController = {
       console.error('Erreur lors de la récupération des orthophonistes:', error);
       res.status(500).json({ message: 'Erreur serveur' });
     }
+  },
+
+  // ========== MÉTHODES ADMIN ==========
+
+  /**
+   * Récupérer la liste des parents (admin uniquement)
+   */
+  getParents: async (req, res) => {
+    try {
+      const parents = await User.findAll({
+        where: { role: 'parent' },
+        attributes: ['id', 'firstName', 'lastName', 'email', 'createdAt'],
+        include: [{
+          model: Patient,
+          as: 'patients',
+          attributes: ['id', 'firstName', 'lastName', 'birthDate', 'createdAt'],
+          include: [{
+            model: Orthophoniste,
+            as: 'orthophoniste',
+            attributes: ['id', 'firstName', 'lastName']
+          }]
+        }],
+        order: [['lastName', 'ASC'], ['firstName', 'ASC']]
+      });
+
+      res.status(200).json(parents);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des parents:', error);
+      res.status(500).json({ 
+        message: 'Erreur serveur lors de la récupération des parents',
+        error: error.message 
+      });
+    }
+  },
+
+  /**
+   * Récupérer les enfants d'un parent
+   */
+  getParentChildren: async (req, res) => {
+    try {
+      const { parentId } = req.params;
+
+      const children = await Patient.findAll({
+        where: { userId: parentId },
+        attributes: ['id', 'firstName', 'lastName', 'birthDate', 'createdAt'],
+        include: [{
+          model: Orthophoniste,
+          as: 'orthophoniste',
+          attributes: ['id', 'firstName', 'lastName']
+        }],
+        order: [['firstName', 'ASC']]
+      });
+
+      res.status(200).json(children);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des enfants:', error);
+      res.status(500).json({ 
+        message: 'Erreur serveur lors de la récupération des enfants',
+        error: error.message 
+      });
+    }
+  },
+
+  /**
+   * Supprimer un parent (admin uniquement)
+   */
+  deleteParent: async (req, res) => {
+    try {
+      const { userId } = req.params;
+
+      // Vérifier que l'utilisateur existe et est un parent
+      const parent = await User.findOne({
+        where: { id: userId, role: 'parent' }
+      });
+
+      if (!parent) {
+        return res.status(404).json({ message: 'Parent non trouvé' });
+      }
+
+      // Supprimer d'abord tous les enfants du parent
+      await Patient.destroy({
+        where: { userId: userId }
+      });
+
+      // Puis supprimer le parent
+      await User.destroy({
+        where: { id: userId }
+      });
+
+      res.status(200).json({ message: 'Parent et ses enfants supprimés avec succès' });
+    } catch (error) {
+      console.error('Erreur lors de la suppression du parent:', error);
+      res.status(500).json({ 
+        message: 'Erreur serveur lors de la suppression du parent',
+        error: error.message 
+      });
+    }
+  },
+
+  /**
+   * Supprimer un enfant spécifique (admin uniquement)
+   */
+  deleteChildById: async (req, res) => {
+    try {
+      const { childId } = req.params;
+
+      const child = await Patient.findByPk(childId);
+
+      if (!child) {
+        return res.status(404).json({ message: 'Enfant non trouvé' });
+      }
+
+      await Patient.destroy({
+        where: { id: childId }
+      });
+
+      res.status(200).json({ message: 'Enfant supprimé avec succès' });
+    } catch (error) {
+      console.error('Erreur lors de la suppression de l\'enfant:', error);
+      res.status(500).json({ 
+        message: 'Erreur serveur lors de la suppression de l\'enfant',
+        error: error.message 
+      });
+    }
   }
 };
 

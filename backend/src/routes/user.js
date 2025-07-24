@@ -18,4 +18,10 @@ router.post('/children', auth, userController.addChild);
 router.put('/children/:childId', auth, userController.updateChild);
 router.delete('/children/:childId', auth, userController.deleteChild);
 
+// Routes admin pour la gestion des parents
+router.get('/parents', auth, userController.getParents);
+router.get('/:parentId/children', auth, userController.getParentChildren);
+router.delete('/:userId', auth, userController.deleteParent);
+router.delete('/children/:childId', auth, userController.deleteChildById);
+
 module.exports = router; 

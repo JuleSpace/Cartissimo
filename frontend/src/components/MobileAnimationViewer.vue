@@ -62,11 +62,22 @@
           </button>
           
           <button 
+            @click="nextAnimation" 
+            :disabled="!hasNext"
+            class="mobile-control-button nav-button"
+          >
+            <span class="icon">→</span>
+            Suivant
+          </button>
+        </div>
+        
+        <div class="mobile-controls-row">
+          <button 
             @click="goBack" 
-            class="mobile-control-button back-button"
+            class="mobile-control-button back-button full-width"
           >
             <span class="icon">⌂</span>
-            Retour
+            Retour aux thèmes
           </button>
         </div>
       </div>
@@ -167,6 +178,10 @@ export default {
       }
     }
     
+    const nextAnimation = () => {
+      emit('next-animation')
+    }
+    
     const goBack = () => {
       emit('go-back')
     }
@@ -188,6 +203,7 @@ export default {
       playSound,
       nextStep,
       previousAnimation,
+      nextAnimation,
       goBack
     }
   }
@@ -332,6 +348,11 @@ export default {
 .back-button:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 187, 106, 0.4);
+}
+
+.full-width {
+  flex: none !important;
+  width: 100% !important;
 }
 
 .mobile-control-button:disabled {

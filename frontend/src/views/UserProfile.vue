@@ -44,10 +44,6 @@
               <label>Email :</label>
               <span>{{ profileData.user.email }}</span>
             </div>
-            <div class="info-item">
-              <label>Rôle :</label>
-              <span class="role-badge">{{ getRoleLabel(profileData.user.role) }}</span>
-            </div>
           </div>
 
           <form v-else @submit.prevent="updateProfile" class="edit-form">
