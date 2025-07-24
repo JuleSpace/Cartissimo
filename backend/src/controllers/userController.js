@@ -437,7 +437,7 @@ const userController = {
         include: [{
           model: Patient,
           as: 'patients',
-          attributes: ['id', 'firstName', 'lastName', 'birthDate', 'createdAt'],
+          attributes: ['id', 'firstName', 'lastName', 'birthDate', 'subscriptionStatus', 'subscriptionEndDate', 'createdAt'],
           include: [{
             model: Orthophoniste,
             as: 'orthophoniste',
@@ -466,7 +466,7 @@ const userController = {
 
       const children = await Patient.findAll({
         where: { userId: parentId },
-        attributes: ['id', 'firstName', 'lastName', 'birthDate', 'createdAt'],
+        attributes: ['id', 'firstName', 'lastName', 'birthDate', 'subscriptionStatus', 'subscriptionEndDate', 'createdAt'],
         include: [{
           model: Orthophoniste,
           as: 'orthophoniste',

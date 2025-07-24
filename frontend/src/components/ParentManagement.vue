@@ -46,6 +46,18 @@
               +{{ parent.patients.length - 3 }} autres
             </span>
           </div>
+          
+          <!-- Résumé des abonnements -->
+          <div class="subscription-summary">
+            <div class="subscription-overview">
+              <span v-for="status in getUniqueSubscriptionStatuses(parent.patients)" 
+                    :key="status" 
+                    :class="['subscription-badge', `status-${status}`]">
+                {{ getSubscriptionStatusText(status) }} 
+                ({{ countSubscriptionStatus(parent.patients, status) }})
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -72,6 +84,8 @@
                      <th>Nom</th>
                      <th>Âge</th>
                      <th>Orthophoniste</th>
+                     <th>État abonnement</th>
+                     <th>Date d'expiration</th>
                    </tr>
                  </thead>
                                  <tbody>
@@ -79,6 +93,17 @@
                      <td>{{ child.firstName }} {{ child.lastName }}</td>
                      <td>{{ calculateAge(child.birthDate) }} ans</td>
                      <td>{{ child.orthophoniste?.firstName }} {{ child.orthophoniste?.lastName || 'Non assigné' }}</td>
+                     <td>
+                       <span :class="['subscription-status', `status-${child.subscriptionStatus}`]">
+                         {{ getSubscriptionStatusText(child.subscriptionStatus) }}
+                       </span>
+                     </td>
+                     <td>
+                       <span v-if="child.subscriptionEndDate" class="subscription-date">
+                         {{ formatDate(child.subscriptionEndDate) }}
+                       </span>
+                       <span v-else class="no-date">-</span>
+                     </td>
                    </tr>
                  </tbody>
               </table>
@@ -95,6 +120,18 @@
                    <div class="child-info">
                      <span class="info-label">Orthophoniste:</span>
                      <span class="info-value">{{ child.orthophoniste?.firstName }} {{ child.orthophoniste?.lastName || 'Non assigné' }}</span>
+                   </div>
+                   <div class="child-info">
+                     <span class="info-label">État abonnement:</span>
+                     <span :class="['info-value', 'subscription-status', `status-${child.subscriptionStatus}`]">
+                       {{ getSubscriptionStatusText(child.subscriptionStatus) }}
+                     </span>
+                   </div>
+                   <div class="child-info">
+                     <span class="info-label">Date d'expiration:</span>
+                     <span class="info-value subscription-date">
+                       {{ child.subscriptionEndDate ? formatDate(child.subscriptionEndDate) : '-' }}
+                     </span>
                    </div>
                    <div class="child-info">
                      <span class="info-label">Date d'ajout:</span>
@@ -246,6 +283,30 @@ export default {
       })
     }
     
+    // Obtenir le texte d'état d'abonnement
+    const getSubscriptionStatusText = (status) => {
+      const statusMap = {
+        'active': 'Actif',
+        'inactive': 'Inactif',
+        'expired': 'Expiré',
+        'payment_failed': 'Paiement échoué'
+      }
+      return statusMap[status] || 'Inconnu'
+    }
+    
+    // Obtenir les statuts d'abonnement uniques pour un parent
+    const getUniqueSubscriptionStatuses = (patients) => {
+      if (!patients || patients.length === 0) return []
+      const statuses = patients.map(patient => patient.subscriptionStatus)
+      return [...new Set(statuses)]
+    }
+    
+    // Compter le nombre d'enfants avec un statut donné
+    const countSubscriptionStatus = (patients, status) => {
+      if (!patients || patients.length === 0) return 0
+      return patients.filter(patient => patient.subscriptionStatus === status).length
+    }
+    
     onMounted(() => {
       console.log('Composant ParentManagement monté, chargement des parents...');
       loadParents()
@@ -266,7 +327,10 @@ export default {
       deleteParent,
       closeChildrenModal,
       calculateAge,
-      formatDate
+      formatDate,
+      getSubscriptionStatusText,
+      getUniqueSubscriptionStatuses,
+      countSubscriptionStatus
     }
   }
 }
@@ -696,5 +760,67 @@ export default {
     max-height: 70vh;
     overflow-y: auto;
   }
+}
+
+/* Styles pour les statuts d'abonnement */
+.subscription-status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-active {
+  background: #E8F5E8;
+  color: #2E7D32;
+}
+
+.status-inactive {
+  background: #FFF3E0;
+  color: #EF6C00;
+}
+
+.status-expired {
+  background: #FFEBEE;
+  color: #C62828;
+}
+
+.status-payment_failed {
+  background: #FCE4EC;
+  color: #AD1457;
+}
+
+.subscription-date {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+}
+
+.no-date {
+  color: #999;
+  font-style: italic;
+}
+
+/* Styles pour le résumé des abonnements dans les cartes parent */
+.subscription-summary {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #E0E0E0;
+}
+
+.subscription-overview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.subscription-badge {
+  padding: 0.2rem 0.4rem;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 </style> 
