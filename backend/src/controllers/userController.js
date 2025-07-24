@@ -252,11 +252,8 @@ const userController = {
         });
       }
 
-      // Hasher le nouveau mot de passe
-      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-      
-      // Mettre à jour le mot de passe
-      user.password = hashedNewPassword;
+      // Mettre à jour le mot de passe (le hook beforeUpdate se chargera du hachage)
+      user.password = newPassword;
       await user.save();
 
       res.json({
