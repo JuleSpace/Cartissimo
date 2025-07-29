@@ -235,7 +235,7 @@ export default {
 
         // Charger les thèmes accordés au parent du patient
         const token = localStorage.getItem('token')
-        const response = await axios.get(`/themes/user/${patient.userId}/themes`, {
+        const response = await axios.get(`/themes/user/${patient.userId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
