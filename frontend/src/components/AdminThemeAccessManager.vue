@@ -169,6 +169,7 @@ export default {
             parent.patients.forEach(patient => {
               allPatients.push({
                 ...patient,
+                userId: parent.id,  // Ajouter l'ID du parent
                 User: parent  // Ajouter les infos du parent
               })
             })
