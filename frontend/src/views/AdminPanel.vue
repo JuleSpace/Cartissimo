@@ -14,7 +14,21 @@
         :class="['nav-button', { active: currentSection === 'themes' }]"
       >
         <span class="nav-icon">📋</span>
-        Gestion des thèmes
+        Approbation thèmes
+      </button>
+      <button 
+        @click="currentSection = 'theme-management'" 
+        :class="['nav-button', { active: currentSection === 'theme-management' }]"
+      >
+        <span class="nav-icon">⚙️</span>
+        Gestion complète
+      </button>
+      <button 
+        @click="currentSection = 'theme-access'" 
+        :class="['nav-button', { active: currentSection === 'theme-access' }]"
+      >
+        <span class="nav-icon">🔐</span>
+        Accès patients
       </button>
       <button 
         @click="currentSection = 'theme-order'" 
@@ -72,6 +86,16 @@
         </div>
       </section>
 
+      <!-- Section de gestion complète des thèmes -->
+      <section v-if="currentSection === 'theme-management'" class="admin-section">
+        <AdminThemeManager />
+      </section>
+
+      <!-- Section de gestion des accès patients -->
+      <section v-if="currentSection === 'theme-access'" class="admin-section">
+        <AdminThemeAccessManager />
+      </section>
+
       <!-- Section de l'ordre des thèmes -->
       <section v-if="currentSection === 'theme-order'" class="admin-section">
         <ThemeOrderManager />
@@ -102,6 +126,8 @@ import OrthophonisteManagement from '@/components/OrthophonisteManagement.vue';
 import ParentManagement from '@/components/ParentManagement.vue';
 import UnassignedPatients from '@/components/UnassignedPatients.vue';
 import ThemeOrderManager from '@/components/ThemeOrderManager.vue';
+import AdminThemeManager from '@/components/AdminThemeManager.vue';
+import AdminThemeAccessManager from '@/components/AdminThemeAccessManager.vue';
 
 export default {
   name: 'AdminPanel',
@@ -109,7 +135,9 @@ export default {
     OrthophonisteManagement,
     ParentManagement,
     UnassignedPatients,
-    ThemeOrderManager
+    ThemeOrderManager,
+    AdminThemeManager,
+    AdminThemeAccessManager
   },
   setup() {
     const store = useStore();

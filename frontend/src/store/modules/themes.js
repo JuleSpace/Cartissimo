@@ -181,6 +181,34 @@ export default {
         commit('SET_LOADING', false);
       }
     },
+    async deleteTheme({ commit, state, rootState }, themeId) {
+      try {
+        commit('SET_LOADING', true);
+        commit('SET_ERROR', null);
+        
+        const response = await axios.delete(`${API_URL}/themes/${themeId}`, {
+          headers: {
+            Authorization: `Bearer ${rootState.auth.token}`
+          }
+        });
+        
+        // Retirer le thème de la liste
+        const updatedThemes = state.themes.filter(theme => theme.id !== themeId);
+        commit('SET_THEMES', updatedThemes);
+        
+        return response.data;
+      } catch (error) {
+        console.error('Erreur détaillée:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
+        commit('SET_ERROR', error.response?.data?.message || 'Erreur lors de la suppression du thème');
+        throw error;
+      } finally {
+        commit('SET_LOADING', false);
+      }
+    },
     async grantAccess({ commit, rootState }, { themeId, patientId }) {
       try {
         commit('SET_LOADING', true);
