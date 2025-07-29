@@ -128,7 +128,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import axios from 'axios'
-import { API_URL } from '@/config'
 
 export default {
   name: 'AdminThemeAccessManager',
