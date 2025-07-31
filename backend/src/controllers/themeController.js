@@ -70,6 +70,11 @@ const themeController = {
         console.log('   Nom fichier:', req.file.filename);
         console.log('   Chemin DB:', imagePath);
         console.log('   Chemin complet:', req.file.path);
+      } else {
+        console.log('❌ AUCUN FICHIER reçu!');
+        console.log('   req.file:', req.file);
+        console.log('   req.files:', req.files);
+        console.log('   Content-Type:', req.headers['content-type']);
       }
       
       console.log('📝 Données à sauvegarder:');

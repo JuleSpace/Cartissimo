@@ -5,6 +5,33 @@ const { auth } = require('../middleware/auth');
 const checkSubscription = require('../middleware/subscription');
 const { controller: animationController } = require('../controllers/animationController');
 
+// Route de test pour l'upload d'image (AVANT auth pour les tests)
+router.post('/test-upload', upload, (req, res) => {
+  console.log('🧪 Test upload:');
+  console.log('   Body:', req.body);
+  console.log('   File:', req.file);
+  console.log('   Files:', req.files);
+  
+  if (req.file) {
+    res.json({
+      success: true,
+      message: 'Fichier reçu',
+      file: {
+        originalname: req.file.originalname,
+        filename: req.file.filename,
+        path: req.file.path,
+        size: req.file.size
+      }
+    });
+  } else {
+    res.json({
+      success: false,
+      message: 'Aucun fichier reçu',
+      body: req.body
+    });
+  }
+});
+
 router.use(auth);
 
 router.post('/', upload, themeController.create);
