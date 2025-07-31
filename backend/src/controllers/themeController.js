@@ -8,27 +8,34 @@ const db = require('../models');
 // Configuration Multer pour l'upload des images de thèmes
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
+    console.log('🔧 Multer destination - file:', file.originalname);
     const uploadDir = path.join(__dirname, '../../public/images/themes');
     
     // Créer le répertoire s'il n'existe pas
     if (!fs.existsSync(uploadDir)) {
+      console.log('📁 Création du dossier:', uploadDir);
       fs.mkdirSync(uploadDir, { recursive: true });
     }
     
+    console.log('📁 Upload dir:', uploadDir);
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     // Générer un nom de fichier unique
     const uniqueName = `theme_${Date.now()}_${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
+    console.log('📝 Nom de fichier généré:', uniqueName);
     cb(null, uniqueName);
   }
 });
 
 const fileFilter = (req, file, cb) => {
+  console.log('🔍 Multer fileFilter - mimetype:', file.mimetype);
   // Accepter seulement les images
   if (file.mimetype.startsWith('image/')) {
+    console.log('✅ Fichier image accepté');
     cb(null, true);
   } else {
+    console.log('❌ Fichier refusé, pas une image');
     cb(new Error('Seuls les fichiers image sont acceptés'), false);
   }
 };
@@ -46,7 +53,10 @@ const themeController = {
   create: async (req, res) => {
     try {
       console.log('=== Début de create ===');
+      console.log('Headers:', req.headers);
       console.log('Body:', req.body);
+      console.log('Files:', req.files);
+      console.log('File (single):', req.file);
       console.log('User:', req.user);
       
       const { name, description } = req.body;
@@ -62,6 +72,13 @@ const themeController = {
         console.log('   Chemin complet:', req.file.path);
       }
       
+      console.log('📝 Données à sauvegarder:');
+      console.log('   Name:', name);
+      console.log('   Description:', description);
+      console.log('   Image path:', imagePath);
+      console.log('   Status: pending');
+      console.log('   Created by:', req.user.id);
+      
       const theme = await Theme.create({
         name,
         description,
@@ -70,7 +87,7 @@ const themeController = {
         createdBy: req.user.id
       });
       
-      console.log('Thème créé:', theme);
+      console.log('✅ Thème créé:', theme.toJSON());
       
       // Créer une entrée dans UserTheme pour lier le créateur au thème
       await UserTheme.create({
