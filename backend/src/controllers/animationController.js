@@ -58,6 +58,12 @@ const animationController = {
         return res.status(403).json({ error: 'Accès non autorisé au thème' });
       }
 
+      // Convertir les chemins complets en chemins relatifs pour l'accès web
+      const publicDir = path.join(__dirname, '../../public');
+      const animatedGifPath = req.files.animatedGif[0].path.replace(publicDir, '').replace(/\\/g, '/');
+      const realGifPath = req.files.realGif[0].path.replace(publicDir, '').replace(/\\/g, '/');
+      const soundPath = req.files.sound[0].path.replace(publicDir, '').replace(/\\/g, '/');
+
       const animation = await Animation.create({
         name,
         description,
@@ -66,9 +72,9 @@ const animationController = {
         height,
         themeId,
         createdBy: req.user.id,
-        animatedGifPath: req.files.animatedGif[0].path,
-        realGifPath: req.files.realGif[0].path,
-        soundPath: req.files.sound[0].path
+        animatedGifPath,
+        realGifPath,
+        soundPath
       });
 
       res.status(201).json(animation);
@@ -135,9 +141,10 @@ const animationController = {
       const soundPath = `/sounds/${folderCategory}/${uniqueSuffix}.mp3`;
 
       // Chemins complets pour le stockage des fichiers
-      const animatedGifFullPath = path.join('public', animatedGifPath);
-      const realGifFullPath = path.join('public', realGifPath);
-      const soundFullPath = path.join('public', soundPath);
+      const publicRoot = path.join(__dirname, '../../public');
+      const animatedGifFullPath = path.join(publicRoot, animatedGifPath);
+      const realGifFullPath = path.join(publicRoot, realGifPath);
+      const soundFullPath = path.join(publicRoot, soundPath);
 
       // Créer les dossiers s'ils n'existent pas
       const animatedGifDir = path.dirname(animatedGifFullPath);
@@ -154,10 +161,18 @@ const animationController = {
         fs.mkdirSync(soundDir, { recursive: true });
       }
 
+      // Log pour debug
+      console.log('🎬 Paths pour animation:');
+      console.log('   Animated GIF:', animatedGifPath, '->', animatedGifFullPath);
+      console.log('   Real GIF:', realGifPath, '->', realGifFullPath);
+      console.log('   Sound:', soundPath, '->', soundFullPath);
+      
       // Déplacer les fichiers vers les emplacements appropriés
       fs.renameSync(files.animatedGif[0].path, animatedGifFullPath);
       fs.renameSync(files.realGif[0].path, realGifFullPath);
       fs.renameSync(files.sound[0].path, soundFullPath);
+      
+      console.log('✅ Fichiers déplacés avec succès!');
 
       // Créer l'animation
       const animation = await Animation.create({

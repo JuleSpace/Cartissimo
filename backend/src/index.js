@@ -92,6 +92,16 @@ app.use('/api/theme-completions', themeCompletionRoutes);
     app.use('/animations', express.static(path.join(__dirname, '../public/animations')));
     app.use('/sounds', express.static(path.join(__dirname, '../public/sounds')));
     app.use('/images', express.static(path.join(__dirname, '../public/images')));
+    app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+    
+    // Logger pour debug des fichiers statiques
+    app.use('/animations/*', (req, res, next) => {
+      console.log(`🎬 Fichier animation demandé: ${req.path}`);
+      const filePath = path.join(__dirname, '../public', req.path);
+      console.log(`📂 Chemin complet: ${filePath}`);
+      console.log(`✅ Fichier existe: ${require('fs').existsSync(filePath)}`);
+      next();
+    });
 
 // Servir le frontend en production
 if (process.env.NODE_ENV === 'production') {

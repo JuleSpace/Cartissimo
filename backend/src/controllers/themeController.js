@@ -56,6 +56,10 @@ const themeController = {
       if (req.file) {
         // Stocker le chemin relatif pour la base de données
         imagePath = `/images/themes/${req.file.filename}`;
+        console.log('🖼️ Image de thème uploadée:');
+        console.log('   Nom fichier:', req.file.filename);
+        console.log('   Chemin DB:', imagePath);
+        console.log('   Chemin complet:', req.file.path);
       }
       
       const theme = await Theme.create({
