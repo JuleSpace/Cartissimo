@@ -142,7 +142,6 @@ export default {
     const actionLoading = ref({})
     const patientSearchQuery = ref('')
     const themeSearchQuery = ref('')
-
     const filteredPatients = ref([])
     const filteredAvailableThemes = ref([])
 
@@ -169,8 +168,8 @@ export default {
             parent.patients.forEach(patient => {
               allPatients.push({
                 ...patient,
-                userId: parent.id,  // Ajouter l'ID du parent
-                User: parent  // Ajouter les infos du parent
+                userId: parent.id,
+                User: parent
               })
             })
           }
