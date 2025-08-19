@@ -1,8 +1,8 @@
 <template>
   <div class="admin-theme-access-manager">
     <div class="header">
-      <h2>Gestion des accès aux thèmes - Patients</h2>
-      <p class="header-description">Gérer l'accès aux thèmes pour tous les patients du système</p>
+      <h2>Suivi de progression des patients</h2>
+      <p class="header-description">Suivre l'avancée des patients dans le déblocage des thèmes par ordre de série</p>
     </div>
 
     <div v-if="loading" class="loading">Chargement...</div>
@@ -44,16 +44,36 @@
         </div>
       </div>
 
-      <!-- Section de gestion des thèmes -->
-      <div v-if="selectedPatientId && selectedPatient" class="themes-section">
+      <!-- Section de suivi de progression -->
+      <div v-if="selectedPatientId && selectedPatient" class="progress-section">
         <div class="patient-summary">
           <h3>Patient sélectionné : {{ selectedPatient.firstName }} {{ selectedPatient.lastName }}</h3>
           <p>Parent : {{ selectedPatient.User?.firstName }} {{ selectedPatient.User?.lastName }}</p>
         </div>
 
-        <div class="themes-management">
-          <div class="available-themes">
-            <h4>Thèmes disponibles ({{ availableThemes.length }})</h4>
+        <div class="progress-overview">
+          <div class="progress-stats">
+            <div class="stat-card">
+              <h4>Thèmes débloqués</h4>
+              <div class="stat-number">{{ unlockedThemes.length }}</div>
+              <div class="stat-label">sur {{ totalThemes }} thèmes</div>
+            </div>
+            <div class="stat-card">
+              <h4>Progression globale</h4>
+              <div class="stat-number">{{ progressPercentage }}%</div>
+              <div class="progress-bar">
+                <div class="progress-fill" :style="{ width: progressPercentage + '%' }"></div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <h4>Prochain thème</h4>
+              <div class="stat-number">{{ nextTheme ? nextTheme.name : 'Aucun' }}</div>
+              <div class="stat-label">{{ nextTheme ? 'En attente de déblocage' : 'Tous débloqués' }}</div>
+            </div>
+          </div>
+
+          <div class="themes-progress">
+            <h4>Détail de la progression par thème</h4>
             <div class="search-themes">
               <input 
                 v-model="themeSearchQuery" 
@@ -63,50 +83,33 @@
                 class="search-input"
               >
             </div>
-            <div v-if="filteredAvailableThemes.length === 0" class="empty-list">
-              Aucun thème disponible
-            </div>
-            <div v-else class="themes-grid">
-              <div v-for="theme in filteredAvailableThemes" :key="theme.id" class="theme-card available">
+            <div class="themes-progress-list">
+              <div v-for="theme in filteredThemesProgress" :key="theme.id" class="theme-progress-card">
                 <div class="theme-info">
                   <h5>{{ theme.name }}</h5>
                   <p>{{ theme.description || 'Aucune description' }}</p>
-                  <span :class="['status-badge', `status-${theme.status}`]">
-                    {{ getThemeStatusText(theme.status) }}
-                  </span>
+                  <div class="theme-meta">
+                    <span :class="['status-badge', `status-${theme.status}`]">
+                      {{ getThemeStatusText(theme.status) }}
+                    </span>
+                    <span class="order-badge">Ordre: {{ theme.order || 'N/A' }}</span>
+                  </div>
                 </div>
-                <button 
-                  @click="grantAccess(theme.id)" 
-                  class="btn-grant"
-                  :disabled="actionLoading[theme.id]"
-                >
-                  {{ actionLoading[theme.id] ? 'Attribution...' : '✓ Accorder' }}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="granted-themes">
-            <h4>Thèmes accordés ({{ grantedThemes.length }})</h4>
-            <div v-if="grantedThemes.length === 0" class="empty-list">
-              Aucun thème accordé
-            </div>
-            <div v-else class="themes-grid">
-              <div v-for="theme in grantedThemes" :key="theme.id" class="theme-card granted">
-                <div class="theme-info">
-                  <h5>{{ theme.name }}</h5>
-                  <p>{{ theme.description || 'Aucune description' }}</p>
-                  <span :class="['status-badge', `status-${theme.status}`]">
-                    {{ getThemeStatusText(theme.status) }}
-                  </span>
+                <div class="theme-progress">
+                  <div class="progress-indicator">
+                    <div v-if="theme.isUnlocked" class="unlocked-indicator">
+                      <span class="unlocked-icon">✓</span>
+                      <span class="unlocked-text">Débloqué</span>
+                    </div>
+                    <div v-else class="locked-indicator">
+                      <span class="locked-icon">🔒</span>
+                      <span class="locked-text">Verrouillé</span>
+                    </div>
+                  </div>
+                  <div v-if="theme.isUnlocked" class="unlock-date">
+                    Débloqué le {{ formatDate(theme.unlockDate) }}
+                  </div>
                 </div>
-                <button 
-                  @click="revokeAccess(theme.id)" 
-                  class="btn-revoke"
-                  :disabled="actionLoading[theme.id]"
-                >
-                  {{ actionLoading[theme.id] ? 'Révocation...' : '✗ Révoquer' }}
-                </button>
               </div>
             </div>
           </div>
@@ -117,7 +120,7 @@
       <div v-if="!selectedPatientId" class="instruction">
         <div class="instruction-content">
           <span class="instruction-icon">👆</span>
-          <p>Sélectionnez un patient ci-dessus pour gérer ses accès aux thèmes</p>
+          <p>Sélectionnez un patient ci-dessus pour voir sa progression dans les thèmes</p>
         </div>
       </div>
     </div>
@@ -137,16 +140,40 @@ export default {
     const error = ref('')
     const patients = ref([])
     const selectedPatientId = ref('')
-    const availableThemes = ref([])
-    const grantedThemes = ref([])
-    const actionLoading = ref({})
     const patientSearchQuery = ref('')
     const themeSearchQuery = ref('')
     const filteredPatients = ref([])
-    const filteredAvailableThemes = ref([])
+    const themesProgress = ref([])
+    const filteredThemesProgress = ref([])
 
     const selectedPatient = computed(() => {
       return patients.value.find(p => p.id === selectedPatientId.value)
+    })
+
+    const unlockedThemes = computed(() => {
+      return themesProgress.value.filter(theme => theme.isUnlocked)
+    })
+
+    const totalThemes = computed(() => {
+      return themesProgress.value.length
+    })
+
+    const progressPercentage = computed(() => {
+      if (totalThemes.value === 0) return 0
+      return Math.round((unlockedThemes.value.length / totalThemes.value) * 100)
+    })
+
+    const nextTheme = computed(() => {
+      const lockedThemes = themesProgress.value.filter(theme => !theme.isUnlocked && theme.status === 'approved')
+      if (lockedThemes.length === 0) return null
+      
+      // Retourner le thème verrouillé avec l'ordre le plus bas
+      return lockedThemes.reduce((lowest, theme) => {
+        if (!lowest || (theme.order && theme.order < lowest.order)) {
+          return theme
+        }
+        return lowest
+      }, null)
     })
 
     const loadPatients = async () => {
@@ -202,12 +229,12 @@ export default {
 
     const filterThemes = () => {
       if (!themeSearchQuery.value) {
-        filteredAvailableThemes.value = availableThemes.value
+        filteredThemesProgress.value = themesProgress.value
         return
       }
 
       const query = themeSearchQuery.value.toLowerCase()
-      filteredAvailableThemes.value = availableThemes.value.filter(theme => 
+      filteredThemesProgress.value = themesProgress.value.filter(theme => 
         theme.name.toLowerCase().includes(query) ||
         (theme.description && theme.description.toLowerCase().includes(query))
       )
@@ -215,10 +242,10 @@ export default {
 
     const selectPatient = async (patientId) => {
       selectedPatientId.value = patientId
-      await loadPatientThemes()
+      await loadPatientProgress()
     }
 
-    const loadPatientThemes = async () => {
+    const loadPatientProgress = async () => {
       if (!selectedPatientId.value) return
 
       try {
@@ -242,68 +269,27 @@ export default {
 
         const parentThemes = response.data
 
-        // Filtrer les thèmes disponibles et accordés
-        grantedThemes.value = allThemes.filter(theme => 
-          parentThemes.some(pt => pt.id === theme.id)
-        )
-        
-        availableThemes.value = allThemes.filter(theme => 
-          !parentThemes.some(pt => pt.id === theme.id) &&
-          theme.status === 'approved'
-        )
+        // Créer la liste de progression des thèmes
+        themesProgress.value = allThemes.map(theme => {
+          const isUnlocked = parentThemes.some(pt => pt.id === theme.id)
+          const unlockDate = isUnlocked ? 
+            parentThemes.find(pt => pt.id === theme.id)?.createdAt || new Date() : 
+            null
 
-        filteredAvailableThemes.value = availableThemes.value
+          return {
+            ...theme,
+            isUnlocked,
+            unlockDate,
+            order: theme.order || 999 // Ordre par défaut si non défini
+          }
+        }).sort((a, b) => (a.order || 999) - (b.order || 999))
+
+        filteredThemesProgress.value = themesProgress.value
         
       } catch (err) {
-        error.value = err.response?.data?.message || 'Erreur lors du chargement des thèmes'
+        error.value = err.response?.data?.message || 'Erreur lors du chargement de la progression'
       } finally {
         loading.value = false
-      }
-    }
-
-    const grantAccess = async (themeId) => {
-      try {
-        actionLoading.value[themeId] = true
-        
-        const token = localStorage.getItem('token')
-        await axios.post('/themes/grant-access', {
-          themeId,
-          patientId: selectedPatientId.value
-        }, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
-        
-        await loadPatientThemes()
-        filterThemes()
-      } catch (err) {
-        error.value = err.response?.data?.message || 'Erreur lors de l\'attribution de l\'accès'
-      } finally {
-        actionLoading.value[themeId] = false
-      }
-    }
-
-    const revokeAccess = async (themeId) => {
-      try {
-        actionLoading.value[themeId] = true
-        
-        const token = localStorage.getItem('token')
-        await axios.post('/themes/revoke-access', {
-          themeId,
-          patientId: selectedPatientId.value
-        }, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
-        
-        await loadPatientThemes()
-        filterThemes()
-      } catch (err) {
-        error.value = err.response?.data?.message || 'Erreur lors de la révocation de l\'accès'
-      } finally {
-        actionLoading.value[themeId] = false
       }
     }
 
@@ -338,6 +324,15 @@ export default {
       return statusMap[status] || status
     }
 
+    const formatDate = (date) => {
+      if (!date) return 'N/A'
+      return new Date(date).toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      })
+    }
+
     onMounted(() => {
       loadPatients()
     })
@@ -348,21 +343,22 @@ export default {
       patients,
       selectedPatientId,
       selectedPatient,
-      availableThemes,
-      grantedThemes,
-      actionLoading,
       patientSearchQuery,
       themeSearchQuery,
       filteredPatients,
-      filteredAvailableThemes,
+      themesProgress,
+      filteredThemesProgress,
+      unlockedThemes,
+      totalThemes,
+      progressPercentage,
+      nextTheme,
       filterPatients,
       filterThemes,
       selectPatient,
-      grantAccess,
-      revokeAccess,
       calculateAge,
       getSubscriptionStatusText,
-      getThemeStatusText
+      getThemeStatusText,
+      formatDate
     }
   }
 }
@@ -479,7 +475,7 @@ export default {
 .status-expired { background: #FFEBEE; color: #C62828; }
 .status-payment_failed { background: #FCE4EC; color: #AD1457; }
 
-.themes-section {
+.progress-section {
   background: white;
   padding: 1.5rem;
   border-radius: 12px;
@@ -502,17 +498,66 @@ export default {
   color: #666;
 }
 
-.themes-management {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.progress-overview {
+  display: flex;
+  flex-direction: column;
   gap: 2rem;
 }
 
-.available-themes, .granted-themes {
+.progress-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-card {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid #E0E0E0;
+}
+
+.stat-card h4 {
+  margin: 0 0 1rem 0;
+  color: #2C3E50;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #4B95DE;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #E0E0E0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50, #45a049);
+  transition: width 0.3s ease;
+}
+
+.themes-progress {
   min-height: 300px;
 }
 
-.available-themes h4, .granted-themes h4 {
+.themes-progress h4 {
   margin: 0 0 1rem 0;
   color: #2C3E50;
   padding-bottom: 0.5rem;
@@ -523,16 +568,16 @@ export default {
   margin-bottom: 1rem;
 }
 
-.themes-grid {
+.themes-progress-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-height: 400px;
+  max-height: 500px;
   overflow-y: auto;
   padding: 0.5rem;
 }
 
-.theme-card {
+.theme-progress-card {
   background: #f8f9fa;
   padding: 1rem;
   border-radius: 8px;
@@ -543,15 +588,7 @@ export default {
   transition: all 0.3s ease;
 }
 
-.theme-card.available {
-  border-left: 4px solid #4CAF50;
-}
-
-.theme-card.granted {
-  border-left: 4px solid #2196F3;
-}
-
-.theme-card:hover {
+.theme-progress-card:hover {
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -573,6 +610,12 @@ export default {
   line-height: 1.3;
 }
 
+.theme-meta {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
 .status-badge {
   display: inline-block;
   padding: 0.2rem 0.4rem;
@@ -581,45 +624,68 @@ export default {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-top: 0.25rem;
 }
 
 .status-pending { background: #FFF3E0; color: #EF6C00; }
 .status-approved { background: #E8F5E8; color: #2E7D32; }
 .status-rejected { background: #FFEBEE; color: #C62828; }
 
-.btn-grant, .btn-revoke {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.8rem;
+.order-badge {
+  display: inline-block;
+  padding: 0.2rem 0.4rem;
+  border-radius: 8px;
+  font-size: 0.7rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 90px;
+  background: #E3F2FD;
+  color: #1976D2;
 }
 
-.btn-grant {
-  background: #4CAF50;
-  color: white;
+.theme-progress {
+  text-align: center;
+  min-width: 120px;
 }
 
-.btn-grant:hover:not(:disabled) {
-  background: #45a049;
+.progress-indicator {
+  margin-bottom: 0.5rem;
 }
 
-.btn-revoke {
-  background: #f44336;
-  color: white;
+.unlocked-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #4CAF50;
+  font-weight: 600;
 }
 
-.btn-revoke:hover:not(:disabled) {
-  background: #da190b;
+.unlocked-icon {
+  font-size: 1.2rem;
+  background: #E8F5E8;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.btn-grant:disabled, .btn-revoke:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.locked-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #666;
+  font-weight: 600;
+}
+
+.locked-icon {
+  font-size: 1.2rem;
+}
+
+.unlock-date {
+  font-size: 0.7rem;
+  color: #666;
+  font-style: italic;
 }
 
 .empty-list {
@@ -676,14 +742,18 @@ export default {
     gap: 0.5rem;
   }
 
-  .themes-management {
+  .progress-stats {
     grid-template-columns: 1fr;
   }
 
-  .theme-card {
+  .theme-progress-card {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+  }
+
+  .theme-meta {
+    flex-wrap: wrap;
   }
 }
 </style> 
