@@ -755,17 +755,11 @@ const themeController = {
         });
       }
 
-      // Vérifier l'accès via la table patient_therapists
-      const hasAccess = await db.sequelize.query(
-        'SELECT * FROM patient_therapists WHERE patient_id = ? AND therapist_id = ?',
-        {
-          replacements: [patient.id, requestingUser.id],
-          type: db.sequelize.QueryTypes.SELECT
-        }
-      );
-
-      if (!hasAccess || hasAccess.length === 0) {
+      // Vérifier l'accès via l'ID orthophoniste du patient (plus simple et correct)
+      if (patient.orthophonisteId !== requestingUser.id) {
         console.log('Pas d\'accès au patient pour l\'orthophoniste:', requestingUser.id);
+        console.log('Patient orthophoniste ID:', patient.orthophonisteId);
+        console.log('Requesting user ID:', requestingUser.id);
         return res.status(403).json({
           success: false,
           message: "Vous n'avez pas accès à ce patient"
