@@ -610,6 +610,19 @@ const themeController = {
 
       // Si l'utilisateur est un orthophoniste, vérifier qu'il a accès au parent
       if (requestingUser.role === 'orthophonist') {
+        // Récupérer l'ID de l'orthophoniste dans la table Orthophoniste
+        const orthophoniste = await Orthophoniste.findOne({
+          where: { userId: requestingUser.id }
+        });
+
+        if (!orthophoniste) {
+          console.log('Orthophoniste non trouvé pour l\'user ID:', requestingUser.id);
+          return res.status(404).json({
+            success: false,
+            message: "Orthophoniste non trouvé"
+          });
+        }
+
         const patient = await Patient.findOne({
           where: { userId }
         });
@@ -622,11 +635,11 @@ const themeController = {
           });
         }
 
-        // Vérifier l'accès via l'ID orthophoniste du patient (plus simple et correct)
-        if (patient.orthophonisteId !== requestingUser.id) {
-          console.log('Pas d\'accès au parent pour l\'orthophoniste:', requestingUser.id);
+        // Vérifier l'accès via l'ID orthophoniste du patient
+        if (patient.orthophonisteId !== orthophoniste.id) {
+          console.log('Pas d\'accès au parent pour l\'orthophoniste:', orthophoniste.id);
           console.log('Patient orthophoniste ID:', patient.orthophonisteId);
-          console.log('Requesting user ID:', requestingUser.id);
+          console.log('Orthophoniste ID:', orthophoniste.id);
           return res.status(403).json({
             success: false,
             message: "Vous n'avez pas accès à ce parent"
@@ -742,6 +755,19 @@ const themeController = {
         });
       }
 
+      // Récupérer l'ID de l'orthophoniste dans la table Orthophoniste
+      const orthophoniste = await Orthophoniste.findOne({
+        where: { userId: requestingUser.id }
+      });
+
+      if (!orthophoniste) {
+        console.log('Orthophoniste non trouvé pour l\'user ID:', requestingUser.id);
+        return res.status(404).json({
+          success: false,
+          message: "Orthophoniste non trouvé"
+        });
+      }
+
       // Vérifier que le patient existe et appartient à l'orthophoniste
       const patient = await Patient.findOne({
         where: { id: patientId }
@@ -755,16 +781,18 @@ const themeController = {
         });
       }
 
-      // Vérifier l'accès via l'ID orthophoniste du patient (plus simple et correct)
-      if (patient.orthophonisteId !== requestingUser.id) {
-        console.log('Pas d\'accès au patient pour l\'orthophoniste:', requestingUser.id);
+      // Vérifier l'accès via l'ID orthophoniste du patient
+      if (patient.orthophonisteId !== orthophoniste.id) {
+        console.log('❌ ACCÈS REFUSÉ');
         console.log('Patient orthophoniste ID:', patient.orthophonisteId);
-        console.log('Requesting user ID:', requestingUser.id);
+        console.log('Orthophoniste ID:', orthophoniste.id);
         return res.status(403).json({
           success: false,
           message: "Vous n'avez pas accès à ce patient"
         });
       }
+
+      console.log('✅ ACCÈS AUTORISÉ');
 
       // Récupérer les thèmes accessibles par le parent du patient
       const userThemes = await UserTheme.findAll({
