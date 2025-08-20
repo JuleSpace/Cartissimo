@@ -679,6 +679,57 @@ const themeController = {
   },
 
   // Méthode spécifique pour les orthophonistes - contourne le middleware checkSubscription
+  getAllThemesForOrtho: async (req, res) => {
+    try {
+      const requestingUser = req.user;
+
+      console.log('=== Début de getAllThemesForOrtho ===');
+      console.log('Requesting User:', requestingUser);
+
+      // Vérifier que l'utilisateur est un orthophoniste
+      if (requestingUser.role !== 'orthophonist') {
+        console.log('Accès non autorisé pour le rôle:', requestingUser.role);
+        return res.status(403).json({
+          success: false,
+          message: "Accès non autorisé - rôle orthophoniste requis"
+        });
+      }
+
+      // Récupérer tous les thèmes approuvés
+      const themes = await Theme.findAll({
+        where: { status: 'approved' },
+        include: [{
+          model: Animation,
+          as: 'animations',
+          where: { status: 'approved' },
+          required: false
+        }]
+      });
+
+      console.log('Nombre de thèmes trouvés:', themes.length);
+
+      // Formater la réponse
+      const formattedThemes = themes.map(theme => ({
+        id: theme.id,
+        name: theme.name,
+        description: theme.description,
+        status: theme.status,
+        animations: theme.animations
+      }));
+
+      console.log('=== Fin de getAllThemesForOrtho ===');
+      res.json(formattedThemes);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des thèmes pour orthophoniste:', error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur lors de la récupération des thèmes",
+        error: error.message
+      });
+    }
+  },
+
+  // Méthode spécifique pour les orthophonistes - contourne le middleware checkSubscription
   getPatientThemesForOrtho: async (req, res) => {
     try {
       const { patientId } = req.params;

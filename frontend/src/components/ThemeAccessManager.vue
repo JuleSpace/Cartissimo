@@ -192,9 +192,8 @@ export default {
         const patient = patients.value.find(p => p.id === selectedPatientId.value);
         if (!patient) return;
 
-        // Charger tous les thèmes
-        await store.dispatch('themes/fetchThemes');
-        const allThemes = store.state.themes.themes;
+        // Charger tous les thèmes (route spécifique pour orthophonistes)
+        const allThemes = await store.dispatch('themes/fetchThemesForOrtho');
         
         // Charger les thèmes accordés au parent du patient (route spécifique pour orthophonistes)
         const parentThemes = await store.dispatch('themes/fetchPatientThemesForOrtho', patient.id);
