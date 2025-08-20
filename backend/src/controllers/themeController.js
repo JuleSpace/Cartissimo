@@ -610,9 +610,9 @@ const themeController = {
 
       // Si l'utilisateur est un orthophoniste, vérifier qu'il a accès au parent
       if (requestingUser.role === 'orthophonist') {
-        // Récupérer l'ID de l'orthophoniste dans la table Orthophoniste par email
+        // Récupérer l'ID de l'orthophoniste dans la table Orthophoniste
         const orthophoniste = await Orthophoniste.findOne({
-          where: { email: requestingUser.email }
+          where: { userId: requestingUser.id }
         });
 
         if (!orthophoniste) {
@@ -755,9 +755,9 @@ const themeController = {
         });
       }
 
-      // Récupérer l'ID de l'orthophoniste dans la table Orthophoniste par email
+      // Récupérer l'ID de l'orthophoniste dans la table Orthophoniste
       const orthophoniste = await Orthophoniste.findOne({
-        where: { email: requestingUser.email }
+        where: { userId: requestingUser.id }
       });
 
       if (!orthophoniste) {
