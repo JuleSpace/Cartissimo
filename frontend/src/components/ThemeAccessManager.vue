@@ -196,8 +196,8 @@ export default {
         await store.dispatch('themes/fetchThemes');
         const allThemes = store.state.themes.themes;
         
-        // Charger les thèmes accordés au parent du patient
-        const parentThemes = await store.dispatch('themes/fetchUserThemes', patient.userId);
+        // Charger les thèmes accordés au parent du patient (route spécifique pour orthophonistes)
+        const parentThemes = await store.dispatch('themes/fetchPatientThemesForOrtho', patient.id);
         
         // Créer la liste de progression des thèmes
         themesProgress.value = allThemes.map(theme => {
