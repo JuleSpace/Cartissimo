@@ -612,7 +612,7 @@ const themeController = {
       if (requestingUser.role === 'orthophonist') {
         // Récupérer l'ID de l'orthophoniste dans la table Orthophoniste
         const orthophoniste = await Orthophoniste.findOne({
-          where: { userId: requestingUser.id }
+          where: { email: requestingUser.email }
         });
 
         if (!orthophoniste) {
@@ -757,7 +757,7 @@ const themeController = {
 
       // Récupérer l'ID de l'orthophoniste dans la table Orthophoniste
       const orthophoniste = await Orthophoniste.findOne({
-        where: { userId: requestingUser.id }
+        where: { email: requestingUser.email }
       });
 
       if (!orthophoniste) {
