@@ -1,13 +1,26 @@
 # Dockerfile multi-étapes pour Cartissimo
 FROM node:18-alpine AS frontend-builder
 
+# Installer git (requis pour certaines dépendances)
+RUN apk add --no-cache git
+
 # Build du frontend
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
-RUN npm ci
+
+# Debug: vérifier les fichiers package
+RUN echo "📦 Package files:" && ls -la && echo "📋 Package.json content:" && cat package.json
+
+# Installation avec plus de détails
+RUN npm ci --verbose
 
 COPY frontend/ ./
-RUN npm run build
+
+# Debug: vérifier les fichiers copiés
+RUN echo "📁 Frontend files:" && ls -la
+
+# Build avec gestion d'erreur
+RUN echo "🔄 Starting build..." && npm run build || (echo "❌ Build failed, checking logs..." && npm run build --verbose && exit 1)
 
 # Vérifier que le build est correct
 RUN echo "🔍 Vérification du build frontend:" && ls -la dist/ && head -5 dist/index.html
