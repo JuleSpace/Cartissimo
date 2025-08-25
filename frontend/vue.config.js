@@ -1,41 +1,55 @@
-const { defineConfig } = require('@vue/cli-service')
-const os = require('os')
-
-// Fonction pour détecter automatiquement l'IP
-function getLocalIP() {
-  const interfaces = os.networkInterfaces();
-  for (const name of Object.keys(interfaces)) {
-    for (const interface of interfaces[name]) {
-      // Ignorer les interfaces loopback et non-IPv4
-      if (interface.family === 'IPv4' && !interface.internal) {
-        return interface.address;
-      }
-    }
-  }
-  return 'localhost';
-}
-
-const IP = process.env.VUE_APP_IP || getLocalIP();
-const API_TARGET = `http://${IP}:3000`;
-
-console.log(`Configuration Vue.js - IP détectée: ${IP}`);
-console.log(`Proxy API configuré vers: ${API_TARGET}`);
+const { defineConfig } = require('@vue/cli-service');
 
 module.exports = defineConfig({
   transpileDependencies: true,
-  devServer: {
-    host: '0.0.0.0',
-    port: 8080,
-    allowedHosts: 'all',
-    proxy: {
-      '/api': {
-        target: API_TARGET,
-        changeOrigin: true,
-        secure: false
+  
+  // Configuration PWA
+  pwa: {
+    name: 'Cartissimo',
+    themeColor: '#4DBA87',
+    msTileColor: '#000000',
+    appleMobileWebAppCapable: 'yes',
+    appleMobileWebAppStatusBarStyle: 'black',
+    workboxPluginMode: 'GenerateSW'
+  },
+
+  // Optimisations pour le build Railway
+  configureWebpack: {
+    optimization: {
+      splitChunks: {
+        chunks: 'all',
+        maxSize: 200000, // Limiter la taille des chunks à 200KB
       }
     }
   },
+
+  // Configuration pour la production
+  productionSourceMap: false, // Désactiver les source maps en production pour accélérer le build
+  
+  // Parallel build pour accélérer
+  parallel: require('os').cpus().length > 1,
+  
+  // Optimiser les assets
   chainWebpack: config => {
-    config.plugins.delete('workbox')
+    // Optimiser les images
+    config.module
+      .rule('images')
+      .test(/\.(png|jpe?g|gif|svg)(\?.*)?$/)
+      .use('url-loader')
+      .loader('url-loader')
+      .options({
+        limit: 8192,
+        name: 'img/[name].[hash:8].[ext]'
+      });
+      
+    // Précharger les chunks critiques seulement
+    config.plugin('preload').tap(options => {
+      options[0] = {
+        rel: 'preload',
+        include: 'initial',
+        fileBlacklist: [/\.map$/, /hot-update\.js$/]
+      };
+      return options;
+    });
   }
-}) 
+});

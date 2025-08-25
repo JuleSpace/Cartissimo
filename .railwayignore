@@ -1,35 +1,36 @@
+# Railway ignore file - exclure les fichiers inutiles du build
+
 # Fichiers de développement
 *.log
 *.tmp
-.cache
-.DS_Store
-.vscode/
-.idea/
-
-# Dépendances (seront réinstallées)
-node_modules/
-*/node_modules/
-
-# Fichiers de build locaux
-frontend/dist/
-backend/logs/
-
-# Variables d'environnement locales
-.env
 .env.local
 .env.development
-.env.production
+.env.test
+
+# Dossiers de développement
+.git/
+.vscode/
+.idea/
+*.code-workspace
 
 # Fichiers de test
-*.test.js
-*.spec.js
-coverage/
+backend/test-*
+backend/*.html
+backend/*.sh
 
-# Documentation de développement
-docs/
+# Documentation
 *.md
 !README.md
 
-# Git
-.git/
-.gitignore 
+# Fichiers volumineux (animations/sons)
+backend/public/animations/
+backend/public/sounds/
+
+# Cache et dépendances locales
+node_modules/
+.npm/
+.cache/
+
+# Fichiers temporaires
+*.temp
+*.bak
