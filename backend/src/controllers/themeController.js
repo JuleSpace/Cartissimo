@@ -54,11 +54,20 @@ const themeController = {
   create: async (req, res) => {
     try {
       console.log('=== Début de create ===');
-      console.log('Headers:', req.headers);
+      console.log('Method:', req.method);
+      console.log('URL:', req.url);
+      console.log('Content-Type:', req.headers['content-type']);
+      console.log('Body keys:', Object.keys(req.body || {}));
       console.log('Body:', req.body);
       console.log('Files:', req.files);
       console.log('File (single):', req.file);
       console.log('User:', req.user);
+      console.log('Multer processed:', !!req.file);
+      
+      // Test si le middleware multer a été appelé
+      if (!req.file && !req.files) {
+        console.log('🚨 AUCUN FICHIER DETECTÉ - Problème Multer ou FormData');
+      }
       
       const { name, description } = req.body;
       

@@ -34,7 +34,20 @@ router.post('/test-upload', upload, (req, res) => {
 
 router.use(auth);
 
-router.post('/', upload, themeController.create);
+// Debug middleware avant multer
+router.post('/', (req, res, next) => {
+  console.log('🔧 Route POST / appelée');
+  console.log('Content-Type avant multer:', req.headers['content-type']);
+  next();
+}, upload, (req, res, next) => {
+  console.log('🔧 Après multer - req.file:', !!req.file);
+  if (req.file) {
+    console.log('📁 Fichier reçu:', req.file.originalname, req.file.size, 'bytes');
+  } else {
+    console.log('❌ Aucun fichier après multer');
+  }
+  next();
+}, themeController.create);
 router.get('/', checkSubscription, themeController.getAllThemes);
 router.get('/:id', checkSubscription, themeController.getOne);
 router.put('/:id', themeController.update);

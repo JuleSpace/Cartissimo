@@ -123,6 +123,8 @@ export default {
 
     const handleImageUpload = (event) => {
       const file = event.target.files[0];
+      console.log('📁 Fichier sélectionné:', file);
+      
       if (file) {
         // Vérifier la taille (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
@@ -136,7 +138,15 @@ export default {
           return;
         }
 
+        // IMPORTANT: Stocker le File object directement
         theme.value.image = file;
+        
+        console.log('✅ Image stockée:', {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          isFile: file instanceof File
+        });
         
         // Créer un aperçu
         const reader = new FileReader();
@@ -146,6 +156,8 @@ export default {
         reader.readAsDataURL(file);
         
         error.value = '';
+      } else {
+        console.log('❌ Aucun fichier sélectionné');
       }
     };
 
@@ -162,12 +174,34 @@ export default {
         // Préparer les données avec l'image si nécessaire
         let themeData;
         
-        if (theme.value.image) {
+        if (theme.value.image && theme.value.image instanceof File) {
           // Si il y a une image, utiliser FormData
+          console.log('📝 Création FormData avec image:', theme.value.image);
+          console.log('   Image name:', theme.value.image.name);
+          console.log('   Image size:', theme.value.image.size);
+          console.log('   Image type:', theme.value.image.type);
+          console.log('   Is File:', theme.value.image instanceof File);
+          
           themeData = new FormData();
           themeData.append('name', theme.value.name);
           themeData.append('description', theme.value.description);
           themeData.append('image', theme.value.image);
+          
+          // Debug FormData
+          console.log('📦 FormData créé:');
+          for (let [key, value] of themeData.entries()) {
+            console.log(`   ${key}:`, value instanceof File ? `File: ${value.name}` : value);
+          }
+        } else if (theme.value.image) {
+          console.log('⚠️ Image existe mais n\'est pas un File:', theme.value.image);
+          console.log('   Type:', typeof theme.value.image);
+          console.log('   Constructor:', theme.value.image.constructor.name);
+          
+          // Fallback: pas d'image
+          themeData = {
+            name: theme.value.name,
+            description: theme.value.description
+          };
         } else {
           // Si pas d'image, envoyer les données normalement
           themeData = {

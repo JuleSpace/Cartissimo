@@ -94,6 +94,9 @@ export default {
         commit('SET_LOADING', true);
         commit('SET_ERROR', null);
         
+        console.log('🚀 Store createTheme - Type de données:', themeData.constructor.name);
+        console.log('🚀 Store createTheme - Is FormData:', themeData instanceof FormData);
+        
         // Configurer les headers selon le type de données
         const headers = {
           Authorization: `Bearer ${rootState.auth.token}`
@@ -103,6 +106,14 @@ export default {
         // pour laisser axios le faire automatiquement
         if (!(themeData instanceof FormData)) {
           headers['Content-Type'] = 'application/json';
+          console.log('📤 Envoi en JSON');
+        } else {
+          console.log('📤 Envoi en FormData (multipart/form-data)');
+          // Debug FormData dans le store
+          console.log('📦 Contenu FormData dans store:');
+          for (let [key, value] of themeData.entries()) {
+            console.log(`   ${key}:`, value instanceof File ? `File: ${value.name}` : value);
+          }
         }
         
         const response = await axios.post(`${API_URL}/themes`, themeData, {
