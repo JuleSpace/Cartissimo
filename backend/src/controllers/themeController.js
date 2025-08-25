@@ -40,13 +40,14 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+// CORRECTION : utiliser .single() pour un seul fichier
 const upload = multer({ 
   storage,
   fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024 // Limite de 5MB
   }
-});
+}).single('image'); // 'image' doit correspondre au nom du champ dans FormData
 
 const themeController = {
   // Créer un nouveau thème
@@ -861,5 +862,5 @@ const themeController = {
 
 module.exports = {
   controller: themeController,
-  upload: upload.single('image')
+  upload: upload // upload est déjà configuré avec .single('image')
 }; 
