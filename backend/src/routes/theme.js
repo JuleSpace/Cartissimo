@@ -54,6 +54,10 @@ router.post('/grant-access', themeController.grantAccess);
 router.post('/revoke-access', themeController.revokeAccess);
 router.get('/user/:userId', checkSubscription, themeController.getUserThemes);
 
+// Routes spécifiques pour les orthophonistes - contournent checkSubscription
+router.get('/ortho/themes', themeController.getAllThemesForOrtho);
+router.get('/ortho/patient/:patientId/themes', themeController.getPatientThemesForOrtho);
+
 // Routes pour la gestion de l'ordre des thèmes (admins uniquement)
 router.get('/admin/themes-order', themeController.getThemesWithOrder);
 router.post('/admin/update-order', themeController.updateThemeOrder);

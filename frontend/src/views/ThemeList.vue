@@ -7,7 +7,7 @@
           <button v-if="userRole === 'orthophonist'" @click="createNewTheme" class="create-button">
             Créer une nouvelle série
           </button>
-          <button v-if="userRole === 'orthophonist'" @click="goToDashboard" class="access-button">
+          <button v-if="userRole === 'orthophonist'" @click="goToDashboard" class="dashboard-button">
             Accès au Dashboard
           </button>
           <button v-if="userRole === 'admin'" @click="goToAdmin" class="admin-button">
@@ -54,9 +54,7 @@
           >
             {{ userRole === 'parent' && !theme.isUnlocked ? 'Verrouillé' : 'Voir les animations' }}
           </button>
-          <button v-if="userRole === 'orthophonist'" @click="manageAccess(theme.id)" class="access-button">
-            Gérer les accès
-          </button>
+
         </div>
       </div>
     </SubscriptionManager>
@@ -112,9 +110,7 @@ export default {
       router.push(`/themes/${themeId}/animations`);
     };
 
-    const manageAccess = (themeId) => {
-      router.push(`/themes/${themeId}/access`);
-    };
+
 
     const getImagePath = (path) => {
       if (!path) return '';
@@ -148,7 +144,7 @@ export default {
       viewAnimations,
       goToDashboard,
       getImagePath,
-      manageAccess
+
     };
   }
 };
@@ -171,7 +167,7 @@ export default {
   gap: 1rem;
 }
 
-.create-button, .admin-button, .view-button, .access-button {
+.create-button, .admin-button, .view-button, .dashboard-button {
   padding: 0.5rem 1rem;
   border-radius: 4px;
   border: none;
@@ -215,7 +211,7 @@ export default {
   box-shadow: 0 4px 12px rgba(75, 149, 222, 0.4);
 }
 
-.access-button {
+.dashboard-button {
   background: linear-gradient(135deg, #FFD75C 0%, #FFA000 100%);
   color: #2C3E50;
   width: 100%;
@@ -223,7 +219,7 @@ export default {
   box-shadow: 0 2px 4px rgba(255, 215, 92, 0.2);
 }
 
-.access-button:hover {
+.dashboard-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(255, 215, 92, 0.4);
 }

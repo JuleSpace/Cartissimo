@@ -281,6 +281,55 @@ export default {
         commit('SET_LOADING', false);
       }
     },
+    async fetchThemesForOrtho({ commit, rootState }) {
+      try {
+        commit('SET_LOADING', true);
+        commit('SET_ERROR', null);
+        
+        const response = await axios.get(`${API_URL}/themes/ortho/themes`, {
+          headers: {
+            Authorization: `Bearer ${rootState.auth.token}`
+          }
+        });
+        
+        commit('SET_THEMES', response.data);
+        return response.data;
+      } catch (error) {
+        console.error('Erreur détaillée:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
+        commit('SET_ERROR', error.response?.data?.message || 'Erreur lors de la récupération des thèmes');
+        throw error;
+      } finally {
+        commit('SET_LOADING', false);
+      }
+    },
+    async fetchPatientThemesForOrtho({ commit, rootState }, patientId) {
+      try {
+        commit('SET_LOADING', true);
+        commit('SET_ERROR', null);
+        
+        const response = await axios.get(`${API_URL}/themes/ortho/patient/${patientId}/themes`, {
+          headers: {
+            Authorization: `Bearer ${rootState.auth.token}`
+          }
+        });
+        
+        return response.data;
+      } catch (error) {
+        console.error('Erreur détaillée:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
+        commit('SET_ERROR', error.response?.data?.message || 'Erreur lors de la récupération des thèmes du patient');
+        throw error;
+      } finally {
+        commit('SET_LOADING', false);
+      }
+    },
     async fetchParentThemes({ commit, rootState }) {
       console.log('Début de fetchParentThemes avec déverrouillage progressif');
       

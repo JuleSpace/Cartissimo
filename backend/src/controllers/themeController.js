@@ -611,6 +611,19 @@ const themeController = {
 
       // Si l'utilisateur est un orthophoniste, vérifier qu'il a accès au parent
       if (requestingUser.role === 'orthophonist') {
+        // Récupérer l'ID de l'orthophoniste dans la table Orthophoniste
+        const orthophoniste = await Orthophoniste.findOne({
+          where: { email: requestingUser.email }
+        });
+
+        if (!orthophoniste) {
+          console.log('Orthophoniste non trouvé pour l\'user ID:', requestingUser.id);
+          return res.status(404).json({
+            success: false,
+            message: "Orthophoniste non trouvé"
+          });
+        }
+
         const patient = await Patient.findOne({
           where: { userId }
         });
@@ -623,17 +636,11 @@ const themeController = {
           });
         }
 
-        // Vérifier l'accès via la table patient_therapists
-        const hasAccess = await db.sequelize.query(
-          'SELECT * FROM patient_therapists WHERE patient_id = ? AND therapist_id = ?',
-          {
-            replacements: [patient.id, requestingUser.id],
-            type: db.sequelize.QueryTypes.SELECT
-          }
-        );
-
-        if (!hasAccess || hasAccess.length === 0) {
-          console.log('Pas d\'accès au parent pour l\'orthophoniste:', requestingUser.id);
+        // Vérifier l'accès via l'ID orthophoniste du patient
+        if (patient.orthophonisteId !== orthophoniste.id) {
+          console.log('Pas d\'accès au parent pour l\'orthophoniste:', orthophoniste.id);
+          console.log('Patient orthophoniste ID:', patient.orthophonisteId);
+          console.log('Orthophoniste ID:', orthophoniste.id);
           return res.status(403).json({
             success: false,
             message: "Vous n'avez pas accès à ce parent"
@@ -671,6 +678,153 @@ const themeController = {
       res.json(themes);
     } catch (error) {
       console.error('Erreur lors de la récupération des thèmes:', error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur lors de la récupération des thèmes",
+        error: error.message
+      });
+    }
+  },
+
+  // Méthode spécifique pour les orthophonistes - contourne le middleware checkSubscription
+  getAllThemesForOrtho: async (req, res) => {
+    try {
+      const requestingUser = req.user;
+
+      console.log('=== Début de getAllThemesForOrtho ===');
+      console.log('Requesting User:', requestingUser);
+
+      // Vérifier que l'utilisateur est un orthophoniste
+      if (requestingUser.role !== 'orthophonist') {
+        console.log('Accès non autorisé pour le rôle:', requestingUser.role);
+        return res.status(403).json({
+          success: false,
+          message: "Accès non autorisé - rôle orthophoniste requis"
+        });
+      }
+
+      // Récupérer tous les thèmes approuvés
+      const themes = await Theme.findAll({
+        where: { status: 'approved' },
+        include: [{
+          model: Animation,
+          as: 'animations',
+          where: { status: 'approved' },
+          required: false
+        }]
+      });
+
+      console.log('Nombre de thèmes trouvés:', themes.length);
+
+      // Formater la réponse
+      const formattedThemes = themes.map(theme => ({
+        id: theme.id,
+        name: theme.name,
+        description: theme.description,
+        status: theme.status,
+        animations: theme.animations
+      }));
+
+      console.log('=== Fin de getAllThemesForOrtho ===');
+      res.json(formattedThemes);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des thèmes pour orthophoniste:', error);
+      res.status(500).json({
+        success: false,
+        message: "Erreur lors de la récupération des thèmes",
+        error: error.message
+      });
+    }
+  },
+
+  // Méthode spécifique pour les orthophonistes - contourne le middleware checkSubscription
+  getPatientThemesForOrtho: async (req, res) => {
+    try {
+      const { patientId } = req.params;
+      const requestingUser = req.user;
+
+      console.log('=== Début de getPatientThemesForOrtho ===');
+      console.log('Patient ID:', patientId);
+      console.log('Requesting User:', requestingUser);
+
+      // Vérifier que l'utilisateur est un orthophoniste
+      if (requestingUser.role !== 'orthophonist') {
+        console.log('Accès non autorisé pour le rôle:', requestingUser.role);
+        return res.status(403).json({
+          success: false,
+          message: "Accès non autorisé - rôle orthophoniste requis"
+        });
+      }
+
+      // Récupérer l'ID de l'orthophoniste dans la table Orthophoniste
+      const orthophoniste = await Orthophoniste.findOne({
+        where: { email: requestingUser.email }
+      });
+
+      if (!orthophoniste) {
+        console.log('Orthophoniste non trouvé pour l\'user ID:', requestingUser.id);
+        return res.status(404).json({
+          success: false,
+          message: "Orthophoniste non trouvé"
+        });
+      }
+
+      // Vérifier que le patient existe et appartient à l'orthophoniste
+      const patient = await Patient.findOne({
+        where: { id: patientId }
+      });
+
+      if (!patient) {
+        console.log('Patient non trouvé pour l\'ID:', patientId);
+        return res.status(404).json({
+          success: false,
+          message: "Patient non trouvé"
+        });
+      }
+
+      // Vérifier l'accès via l'ID orthophoniste du patient
+      if (patient.orthophonisteId !== orthophoniste.id) {
+        console.log('❌ ACCÈS REFUSÉ');
+        console.log('Patient orthophoniste ID:', patient.orthophonisteId);
+        console.log('Orthophoniste ID:', orthophoniste.id);
+        return res.status(403).json({
+          success: false,
+          message: "Vous n'avez pas accès à ce patient"
+        });
+      }
+
+      console.log('✅ ACCÈS AUTORISÉ');
+
+      // Récupérer les thèmes accessibles par le parent du patient
+      const userThemes = await UserTheme.findAll({
+        where: { userId: patient.userId },
+        include: [{
+          model: Theme,
+          as: 'theme',
+          include: [{
+            model: Animation,
+            as: 'animations',
+            where: { status: 'approved' },
+            required: false
+          }]
+        }]
+      });
+
+      console.log('Nombre de thèmes trouvés pour le patient:', userThemes.length);
+
+      // Formater la réponse
+      const themes = userThemes.map(ut => ({
+        id: ut.theme.id,
+        name: ut.theme.name,
+        description: ut.theme.description,
+        status: ut.theme.status,
+        animations: ut.theme.animations
+      }));
+
+      console.log('=== Fin de getPatientThemesForOrtho ===');
+      res.json(themes);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des thèmes pour orthophoniste:', error);
       res.status(500).json({
         success: false,
         message: "Erreur lors de la récupération des thèmes",
