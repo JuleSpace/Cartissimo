@@ -1,0 +1,36 @@
+# Dockerfile simplifié pour debug
+FROM node:18-alpine
+
+# Installer les dépendances système
+RUN apk add --no-cache git
+
+WORKDIR /app
+
+# Copier tous les fichiers
+COPY . .
+
+# Build étape par étape avec debug
+RUN echo "🔄 Installation backend..." && \
+    cd backend && npm ci --only=production && \
+    echo "✅ Backend installé"
+
+RUN echo "🔄 Installation frontend..." && \
+    cd frontend && npm ci && \
+    echo "✅ Frontend installé"
+
+RUN echo "🔄 Build frontend..." && \
+    cd frontend && \
+    npm run build --verbose && \
+    echo "✅ Frontend buildé" && \
+    ls -la dist/
+
+# Vérification finale
+RUN echo "🔍 Vérification finale:" && \
+    ls -la frontend/dist/ && \
+    echo "Index.html existe:" && \
+    test -f frontend/dist/index.html && echo "✅ OK" || echo "❌ MANQUANT"
+
+EXPOSE 8080
+
+# Démarrer le backend
+CMD ["node", "backend/src/index.js"]
